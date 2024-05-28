@@ -1,0 +1,57 @@
+<h1 class="title">Chỉnh sửa sản phẩm </h1>
+<form
+  action="/products/{{product.id}}?_method=PUT"
+  method="post"
+  enctype="multipart/form-data"
+  class="form__create__product"
+>
+  <div>
+    <label>Tên sản phẩm:</label>
+    <input type="text" name="name" value="{{product.name}}" />
+  </div>
+  <div>
+    <label>Loại sản phẩm:</label>
+     <select name="category">
+        <option value="ghe-sofa-dai" {{#if (eq product.category "ghe-sofa-dai")}}selected{{/if}}>Ghế Sofa dài</option>
+        <option value="ghe-sofa-don" {{#if (eq product.category "ghe-sofa-don")}}selected{{/if}}>Ghế Sofa đơn</option>
+        <option value="ban-dai" {{#if (eq product.category "ban-dai")}}selected{{/if}}>Bàn dài</option>
+        <option value="ban-tron" {{#if (eq product.category "ban-tron")}}selected{{/if}}>Bàn tròn</option>
+    </select>
+  </div>
+  <div> 
+    <label>Mô tả:</label>
+    <textarea type="text" name="des">{{product.des}}</textarea>
+  </div>
+  <div>
+    <label>Giá(1.000 vnđ):</label>
+    <input type="text" name="price" value="{{product.price}}" />
+  </div>
+  <div>
+    <label>Giảm giá(%):</label>
+    <input type="text" name="sale" value="{{product.sale}}" />
+  </div>
+
+  <div name="size" class="gr__item__size">
+    <h4>Kích thước(m)</h4>
+    <div>
+      <label>Chiều dài:</label>
+      <input type="text" name="size__length" value="{{product.size.length}}" />
+    </div>
+    <div>
+      <label>Chiều rộng:</label>
+      <input type="text" name="size__width" value="{{product.size.width}}" />
+    </div>
+    <div>
+      <label>Chiều cao:</label>
+      <input type="text" name="size__height" value="{{product.size.height}}" />
+    </div>
+  </div>
+
+  <div>
+    <label>Ảnh sản phẩm:</label>
+    <input type="file" name="image-product" />
+  </div>
+  <button type="submit" class="btn btn__primary">
+    <i class="icon fa-solid fa-check"></i>Hoàn tất chỉnh sửa</button>
+
+</form>
