@@ -1,10 +1,10 @@
 const express = require("express");
 const authController = require("../controller/AuthController");
-const isAuthenticated = require("../middleware/isAuthenticated");
+const upload = require("../middleware/multerUpload");
 
 const route = express.Router();
 
-route.post("/resgiter", authController.resgister);
+route.post("/register", upload.single(), authController.register);
 route.get("/login", authController.login);
 
 module.exports = route;

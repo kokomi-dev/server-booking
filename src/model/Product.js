@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
 const slug = require("mongoose-slug-generator");
-var mongoose_delete = require("mongoose-delete");
 mongoose.plugin(slug);
-const Schema = mongoose.Schema;
-const Product = new Schema({
+const Product = new mongoose.Schema({
   id: { type: String },
   name: { type: String, required: true },
   category: { type: String, require: true },
@@ -25,11 +23,7 @@ const Product = new Schema({
   evaluate: { type: Number },
   quantity_sold: { type: Number },
   slug: { type: String, slug: "id" },
-  createdAt: { type: Date },
+  createdAt: { type: Date, date: Date.now() },
 });
-Product.plugin(mongoose_delete, {
-  overrideMethods: true,
 
-  deletedAt: true,
-});
 module.exports = mongoose.model("Product", Product);
