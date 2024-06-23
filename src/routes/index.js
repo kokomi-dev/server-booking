@@ -1,9 +1,9 @@
 const productRoute = require("./ProductsRoute");
-const siteRoute = require("./SiteRoute");
 const userRoute = require("./UserRoute");
+const authRoute = require("./AuthRoute");
 function route(app) {
   app.use("/products", productRoute);
   app.use("/users", userRoute);
-  app.use("/", siteRoute);
+  app.use("/", authRoute);
 }
 module.exports = route;
