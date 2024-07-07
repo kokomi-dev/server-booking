@@ -1,7 +1,7 @@
-const productRoute = require("./ProductsRoute");
+const tourRoute = require("./TourRoute");
 const authRoute = require("./AuthRoute");
 function route(app) {
-  app.use("/api/products", productRoute);
+  app.use("/api/tour", tourRoute);
   app.use("/api/auth", authRoute);
 }
 

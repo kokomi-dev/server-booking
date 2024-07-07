@@ -83,7 +83,18 @@ const login = async (request, response) => {
     console.log(error);
   }
 };
+const logout = async(request, response) => {
+try{
+
+
+}
+catch{
+  
+}
+
+};
 module.exports = {
   register,
   login,
+  logout,
 };

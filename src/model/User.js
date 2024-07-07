@@ -1,15 +1,14 @@
 const mongoose = require("mongoose");
 const User = new mongoose.Schema({
-  name: { type: String, require: true },
-  img: { type: String, require: true },
+  name: { type: String, required: true },
+  img: { type: String },
   email: {
     type: String,
-    require: true,
+    required: true,
     unique: true,
     match: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
   },
-  password: { type: String, require: true },
-  role: { type: String, default: "member" },
+  password: { type: String, required: true },
   createdAt: { type: Date, date: Date.now() },
 });
 
