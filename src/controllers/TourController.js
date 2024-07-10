@@ -1,26 +1,39 @@
-const Tour = require("../model/Tour");
-const { v4: uuidv4 } = require("uuid");
-const { mongooseArrays } = require("../util/mongoose");
+const Tour = require("../models/Tour");
+const { mongooseArrays } = require("../utils/mongoose");
 
 const getTours = async (req, res, next) => {
   try {
-    Tour.find({}).then((tour) => {
-      if (tour) {
-        return res.status(200).json({
-          messages: "Lấy danh sách tour du lịch thành công",
-          data: mongooseArrays(tour),
-        });
-      }
-    });
+    const listQuery = {};
+    const query = req.query;
+    // limit
+    const limit = parseInt(query.limit) || 10;
+    // trending
+    if (query.trending === "true") {
+      listQuery.isTrending = true;
+    }
+    // Find tours with the query and limit
+    const tours = await Tour.find(listQuery).limit(limit);
+    // Send response
+    if (tours.length > 0) {
+      res.status(200).json({
+        messages: "Lấy danh sách tour du lịch thành công",
+        data: mongooseArrays(tours),
+      });
+    } else {
+      res.status(200).json({
+        messages: "Không có tour nào được tìm thấy",
+        data: [],
+      });
+    }
   } catch (error) {
-    console.log("Xảy ra lỗi khi lấy danh sách tour", error);
+    next(error);
   }
 };
+
 const createTours = async (req, res, next) => {
   try {
     const img = req.files.map((img) => img.path);
     const formData = req.body;
-    formData.id = await uuidv4();
     formData.images = img;
     formData.createdAt = new Date().toLocaleDateString("vi-VN");
     // new Tour
@@ -68,39 +81,9 @@ const deleteTour = async (req, res, next) => {
     console.log("Có lỗi xảy ra khi xóa tour này");
   }
 };
-const getToursWithCondition = async () => {
-  try {
-    const conditon = req.params;
-    console.log(conditon);
-    switch (conditon) {
-      case "trending": {
-        Tour.find({
-          isTrending: true,
-        }).then((tour) => {
-          if (tour) {
-            return res.status(200).json({
-              messages: "Lấy danh sách tour du lịch nổi bật thành công",
-              data: mongooseArrays(tour),
-            });
-          }
-        });
-      }
-      default:
-        Tour.find({}).then((tour) => {
-          if (tour) {
-            return res.status(200).json({
-              messages: "Lấy danh sách tour du lịch thành công",
-              data: mongooseArrays(tour),
-            });
-          }
-        });
-    }
-  } catch {}
-};
 module.exports = {
   getTours,
   updateTours,
   deleteTour,
   createTours,
-  getToursWithCondition,
 };

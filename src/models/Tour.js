@@ -8,7 +8,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    id: {
+    slug: {
       type: String,
       slug: "name",
     },

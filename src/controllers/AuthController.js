@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const userModel = require("../model/User");
+const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 const validatePasword = (password) => {
   return password.match(
@@ -83,15 +83,9 @@ const login = async (request, response) => {
     console.log(error);
   }
 };
-const logout = async(request, response) => {
-try{
-
-
-}
-catch{
-  
-}
-
+const logout = async (request, response) => {
+  try {
+  } catch {}
 };
 module.exports = {
   register,
