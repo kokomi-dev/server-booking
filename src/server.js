@@ -3,7 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const route = require("./routes/index");
-const errorHandling = require("./middleware/errorHandling");
+import errorHandling from "~/middlewares/errorHandling";
 const db = require("./db/db");
 const app = express();
 require("dotenv").config();

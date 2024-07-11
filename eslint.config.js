@@ -1,4 +1,5 @@
 module.exports = {
+  files: ["src/**/*.js"],
   env: { browser: true, es2020: true, node: true },
   extends: ["eslint:recommended"],
   parser: "@babel/eslint-parser",
@@ -6,8 +7,9 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
     allowImportExportEverywhere: true,
+    requireConfigFile: false,
   },
-  settings: { react: { version: "18.2" } },
+  settings: {},
   plugins: [],
   rules: {
     "no-console": 1,
