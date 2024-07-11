@@ -1,7 +1,7 @@
 {
   "presets": ["@babel/preset-env"],
   "plugins": [
-    ["babel/transform-runtime"],
-    ["module-resolvers", { "alias": { "~": "./src" } }]
+    ["@babel/plugin-transform-runtime"],
+    ["module-resolver", { "alias": { "~": "./src" } }]
   ]
 }
