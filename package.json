@@ -5,12 +5,18 @@
   "main": "./src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./src/server.js",
-    "production": ""
+    "start": "nodemon --exec babel-node ./src/server.js",
+    "build-bael": "babel ./src -d ./build/src",
+    "build": "npm run clean && node ./build/src/server.js",
+    "production": " npm run build && node ./build/src/server.js ",
+    "lint": "eslint src --max-warnings 0"
   },
-  "author": "",
+  "author": "kokomi dev - nguyễn thế an",
   "license": "ISC",
   "dependencies": {
+    "@babel/eslint-parser": "^7.24.7",
+    "@babel/node": "^7.24.7",
+    "babel-plugin-module-resolver": "^5.0.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cloudinary": "^1.41.3",
@@ -28,5 +34,12 @@
     "nodemon": "^3.1.0",
     "uuid": "^10.0.0",
     "uuidv4": "^6.2.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/plugin-transform-runtime": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@eslint/js": "^9.6.0",
+    "eslint": "^9.6.0"
   }
 }
