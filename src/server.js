@@ -15,6 +15,7 @@ const START_SERVICE = () => {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cors());
+
   route(app);
   app.use(errorHandling);
 
