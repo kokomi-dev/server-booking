@@ -12,9 +12,9 @@ const errorHandling = (error, req, res, next) => {
     stack: error.stack,
   };
   // nếu ở trong mỗi trường dev thì sẽ có log lỗi cả stack còn ở production thì không có stack
-  if (env.NODE_MODE !== "dev") {
-    return delete responseError.stack;
-  }
+  // if (env.NODE_MODE !== "dev") {
+  //   return delete responseError.stack;
+  // }
   res.status(responseError.statusCode).json(responseError);
 };
 module.exports = errorHandling;
