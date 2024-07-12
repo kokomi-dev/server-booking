@@ -10,6 +10,7 @@ const comboSchema = new mongoose.Schema({
   sales: { type: Number },
   rating: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now() },
+  updatedAt: { type: Date },
   details: [String],
 });
 

@@ -5,7 +5,7 @@ const methodOverride = require("method-override");
 const route = require("./routes/index");
 const errorHandling = require("~/middlewares/errorHandling");
 const env = require("~/config/enviroment");
-const { CONNECT_DB, GET_DB } = require("~/config/mongodb");
+const { CONNECT_DB } = require("~/config/mongosee");
 
 const START_SERVICE = () => {
   const app = express();
@@ -21,14 +21,14 @@ const START_SERVICE = () => {
 
   const PORT = env.PORT || 8080;
   app.listen(PORT, () => {
-    console.log(`3. Server is running  ${PORT}`);
+    console.log(`3.Server is running  ${PORT}`);
   });
 };
 (async () => {
   try {
-    console.log("1. Connecting mongodb atlas");
+    console.log("1.Mongosee connecting mongodb atlas");
     await CONNECT_DB();
-    console.log("2. Connected to mongodb atlas successfully");
+    console.log("2.Mongosee connected to mongodb atlas ");
     START_SERVICE();
   } catch (error) {
     console.error(error);
