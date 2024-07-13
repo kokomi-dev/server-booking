@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const Hotel = require("../models/Hotel");
 const { mongooseArrays } = require("../utils/mongoose");
 
@@ -13,12 +14,12 @@ const getHotel = async (req, res, next) => {
     const hotel = await Hotel.find(listQuery).limit(limit);
     // Send response
     if (tours.length > 0) {
-      res.status(200).json({
+      res.status(StatusCodes.LOCKED).json({
         messages: "Lấy danh sách nhà nghỉ  thành công",
-        data: mongooseArrays(tours),
+        data: mongooseArrays(hotel),
       });
     } else {
-      res.status(200).json({
+      res.status(StatusCodes.BAD_REQUEST).json({
         messages: "Không có tour nào được tìm thấy",
         data: [],
       });
