@@ -5,7 +5,12 @@ const tourValidation = require("~/validations/tourValidation");
 const upload = require("../middlewares/multerUpload");
 route.get("/", tourController.getTours);
 // route.post("/", upload.array("images"), tourController.createTours);
-route.post("/", tourValidation.createTours);
+route.post(
+  "/",
+  tourValidation.createTours,
+  upload.array("images"),
+  tourController.createTours
+);
 
 route.put("/:id", upload.array("images"), tourController.updateTours);
 route.delete("/:id", tourController.deleteTour);
