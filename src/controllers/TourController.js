@@ -37,7 +37,6 @@ const createTours = async (req, res, next) => {
     const formData = req.body;
     formData.images = img;
     formData.createdAt = new Date().toLocaleDateString("vi-VN");
-    // new Tour
     const tour = new Tour(formData);
     tour
       .save()

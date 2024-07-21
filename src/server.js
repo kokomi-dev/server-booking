@@ -6,19 +6,42 @@ const route = require("./routes/index");
 const errorHandling = require("~/middlewares/errorHandling");
 const env = require("~/config/enviroment");
 const { CONNECT_DB } = require("~/config/mongosee");
-
+const hbs = require("express-handlebars").engine;
+const path = require("path");
 const START_SERVICE = () => {
   const app = express();
+
+  // view engine handlebars
+  app.set("view engine", "hbs");
+  app.engine(
+    "hbs",
+    hbs({
+      extname: "hbs",
+      defaultLayout: "main",
+      layoutsDir: __dirname + "/views/layouts/",
+      partialsDir: __dirname + "/views/partials/",
+      helpers: {
+        first_img: (images) => {
+          return images[0];
+        },
+      },
+    })
+  );
+
+  // Thiết lập thư mục views
+  app.set("views", __dirname + "/views");
+  app.use(express.static("public"));
 
   app.use(methodOverride("_method"));
   // Middleware  URL-encoded and JSON
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cors());
-
+  // route
   route(app);
+  // middleware => handle event erros
   app.use(errorHandling);
-
+  // listen server on the port local
   const PORT = env.PORT || 8080;
   app.listen(PORT, () => {
     console.log(`3.Server is running  ${PORT}`);

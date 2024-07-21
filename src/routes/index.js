@@ -7,6 +7,9 @@ function route(app) {
   app.use("/api/auth", authRoute);
   app.use("/api/hotel", hotelRoute);
   app.use("/api/combo", comboRoute);
+  app.use("/api/views-dashboard", (req, res) => {
+    res.render("home");
+  });
 }
 
 module.exports = route;
