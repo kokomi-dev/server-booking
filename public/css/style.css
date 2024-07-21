@@ -1,0 +1,133 @@
+body {
+  margin: 0;
+  padding: 2rem 5rem;
+}
+/* BASE */
+.mt-2 {
+  margin-top: 2rem;
+}
+.button {
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all linear 0.2s;
+  text-decoration: none;
+}
+.button.primary {
+  background-color: blue;
+  color: white;
+}
+.button.second {
+  background-color: black;
+  color: white;
+}
+.button.dangerous {
+  background-color: red;
+  color: white;
+}
+.button.cancel {
+  background-color: transparent;
+  border: 1px solid #888;
+}
+.button:hover {
+  opacity: 0.7;
+}
+/* END BASE */
+
+/* HEADER */
+.header__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.header__nav li:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.header__nav li a {
+  color: black;
+}
+.header__nav li a:hover {
+  color: #888;
+}
+/* END HEADER */
+
+/* BASE PAGE */
+.container {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.title {
+  color: red;
+}
+.head {
+  padding: 1rem 0px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.form {
+}
+.form__gr {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  margin: 1rem 0px;
+}
+.form__label {
+  font-size: 1.1rem;
+  color: #222;
+  margin-right: 12px;
+  width: 140px;
+}
+.form__input {
+  padding: 2px 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  width: 90%;
+}
+.form__input.large {
+  min-width: 70%;
+  max-width: 80%;
+  width: 100%;
+}
+.form__input:focus {
+  outline: 1px solid #111;
+}
+/* END BASE PAGE */
+
+/* CSS TABLE */
+.table,
+th,
+td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.table tr {
+}
+.table .table_head {
+  background-color: #888;
+  color: white;
+}
+.table tr td {
+  padding: 2px 4px;
+  text-align: center;
+  text-transform: capitalize;
+}
+.table tr td img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+/* END CSS TABlE */
+
+/* PAGE TOUR */
+.tour__container {
+}
+
+/* END PAGE TOUR */

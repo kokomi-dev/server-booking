@@ -1,0 +1,33 @@
+<div class="container">
+   <h1 class="title">Quản lí dữ liệu Tours</h1>
+   <div class="head">
+      <a class="button primary" href="tours/create">Thêm mới</a>
+   </div>
+   <table class="table">
+      <tr class="table_head">
+         <th>Tên</th>
+         <th>Ảnh</th>
+         <th>Khu vực</th>
+         <th>Thời gian</th>
+         <th>Địa điểm</th>
+         <th>Giá tiền</th>
+         <th>Tùy chọn</th>
+      </tr>
+      {{#each data}}
+      <tr>
+         <td>{{this.name}}</td>
+         <td>
+            <img class="" src={{first_img this.images}} />
+         </td>
+         <td>{{this.arena}}</td>
+         <td>{{this.startDate}}</td>
+         <td>{{this.location}}</td>
+         <td>{{this.price}}</td>
+         <td>
+            <button class="button second">Sửa</button>
+            <button class="button cancel">Xóa</button>
+         </td>
+      </tr>
+      {{/each}}
+   </table>
+</div>

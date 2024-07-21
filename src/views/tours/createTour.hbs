@@ -1,0 +1,141 @@
+<div class="container">
+   <h1 class="title">Thêm mới một chuyến du lịch</h1>
+   <div class="head">
+      <p>Hãy điền đầy đủ các trường dưới đây của chúng tôi</p>
+   </div>
+   <form class="form" action="/api/tour" method="post">
+      <div class="form__gr">
+         <label for="name" class="form__label">Tên tour</label>
+         <input id="name" name="name" class="form__input large" />
+      </div>
+
+      <div class="form__gr">
+         <label for="description" class="form__label">Mô tả </label>
+         <textarea id="description" name="description" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="details" class="form__label">Chi tiết 1 </label>
+         <textarea id="details" name="details" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="details" class="form__label">Chi tiết 2 </label>
+         <textarea id="details" name="details" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="details" class="form__label">Chi tiết 3 </label>
+         <textarea id="details" name="details" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="details" class="form__label">Chi tiết 4 </label>
+         <textarea id="details" name="details" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="details" class="form__label">Chi tiết 5 </label>
+         <textarea id="details" name="details" class="form__input large"></textarea>
+      </div>
+      <div class="form__gr">
+         <label for="location" class="form__label">Địa chỉ</label>
+         <input id="location" name="location" class="form__input large" />
+      </div>
+      <div class="form__gr">
+         <div class="form__gr">
+            <label for="arena" class="form__label">Khu vực</label>
+            <select id="arena" name="arena">
+               <option value="Miền Bắc">Miền Bắc</option>
+               <option value="Miền Trung">Miền Trung</option>
+               <option value="Miền Nam">Miền Nam</option>
+            </select>
+         </div>
+         <div class="form__gr">
+            <label for="city" class="form__label">Tên tỉnh (thành phố)</label>
+            <input id="city" name="city" class="form__input " />
+         </div>
+      </div>
+      <div class="form__gr">
+         <div class="form__gr">
+            <label for="price" class="form__label">Giá tiền</label>
+            <input id="price" name="price" class="form__input large" />
+         </div>
+         <div class="form__gr">
+            <label for="maxGroupSize" class="form__label">Số người tham gia tối đa</label>
+            <input id="maxGroupSize" name="maxGroupSize" class="form__input " />
+         </div>
+
+      </div>
+      <div class="form__gr">
+         <div class="form__gr">
+            <label for="startDate" class="form__label">Ngày bắt đầu</label>
+            <input type="date" id="startDate" name="startDate" class="form__input " />
+         </div>
+         <div class="form__gr">
+            <label for="endDate" class="form__label">Ngày kết thúc</label>
+            <input type="date" id="endDate" name="endDate" class="form__input " />
+         </div>
+         <div class="form__gr">
+            <label for="guides" class="form__label">Người dẫn đoàn</label>
+            <input id="guides" name="guides" class="form__input " />
+         </div>
+         <div class="form__gr">
+            <label for="isTrending" class="form__label">Có phải là tour đang hot</label>
+            <select id="isTrending" name="isTrending">
+               <option value="true">Có</option>
+               <option value="false">Không</option>
+            </select>
+         </div>
+      </div>
+      <div class="form__gr">
+         <div class="form__gr">
+            <label for="hightlights" class="form__label">Điểm nổi bật</label>
+            <input id="hightlights" name="hightlights" class="form__input " />
+         </div>
+
+         <div class="form__gr">
+            <label for="difficulty" class="form__label">Độ khó của tour</label>
+            <select id="difficulty" name="difficulty" class="form__input ">
+               <option value="dễ">Dễ</option>
+               <option value="trung bình">Trung bình</option>
+               <option value="khó">Khó</option>
+
+            </select>
+         </div>
+
+      </div>
+      <div class="form__gr">
+         <label for="included" class="form__label">Dịch vụ có trong tour</label>
+         <div class="form__gr">
+            <h4>Miễn phí 1 nước uống theo chai (1 chai/ 1 người)</h4>
+            <input id="included" name="included" class="form__input " checked type="checkbox"
+               value="Miễn phí 1 nước uống theo chai (1 chai/ 1 người)">
+         </div>
+         <div class="form__gr">
+            <h4>Một hoặc nhiều hơn hướng dẫn viên du lịch cho hành trình của bạn( trên 5 người )</h4>
+            <input id="included" name="included" class="form__input " checked type="checkbox"
+               value="Một hoặc nhiều hơn hướng dẫn viên du lịch cho hành trình của bạn( trên 5 người )">
+         </div>
+         <div class="form__gr">
+            <h4>Dịch vụ ăn uống trọn gói</h4>
+            <input id="included" name="included" class="form__input " type="checkbox" value="Dịch vụ ăn uống trọn gói">
+         </div>
+         <div class="form__gr">
+            <h4>Dịch vụ xe đón, đưa đến các địa điểm du lịch có trong tour</h4>
+            <input id="included" name="included" class="form__input " type="checkbox"
+               value="Dịch vụ xe đón, đưa đến các địa điểm du lịch có trong tour">
+         </div>
+         <div class="form__gr">
+            <h4>Dịch vụ nhà nghỉ theo yêu cầu của khách hàng( ưu đãi hơn khi đặt phòng qua chúng tôi)</h4>
+            <input id="included" name="included" class="form__input " type="checkbox"
+               value="Dịch vụ nhà nghỉ theo yêu cầu của khách hàng( ưu đãi hơn khi đặt phòng qua chúng tôi)">
+         </div>
+         <div class="form__gr">
+            <h4>Dịch vụ tổng hợp( tất cả mọi thứ liên quan đến tour này)</h4>
+            <input id="included" name="included" class="form__input " type="checkbox"
+               value="Dịch vụ tổng hợp( tất cả mọi thứ liên quan đến tour này)">
+         </div>
+      </div>
+      <div class="form__gr">
+         <label for="images" class="form__label">Ảnh tour (5 ảnh)</label>
+         <input type="file" multiple="true" id="images" name="images" class="form__input " />
+      </div>
+      <button type="submit " class="button primary mt-2">Thêm mới</button>
+   </form>
+</div>
