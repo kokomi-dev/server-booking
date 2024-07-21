@@ -8,8 +8,8 @@ route.get("/", tourController.getTours);
 // POST -api/tour - add new tour
 route.post(
   "/",
+  upload.array("images", 5),
   tourValidation.createTours,
-  // upload.array("images"),
   tourController.createTours
 );
 // GET -api/tour/create - get view handlebars create tour

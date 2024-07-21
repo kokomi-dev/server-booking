@@ -5,10 +5,9 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "img_tour_booking",
-    format: async (req, file) => "png",
     public_id: (req, file) => file.originalname.split(".")[0],
   },
-  allowedFormats: ["jpg", "png", "jpeg"],
+  allowedFormats: ["jpg", "png", "jpeg", "gif"],
   transformation: [{ width: 1200, height: 1200, crop: "limit" }],
 });
 
