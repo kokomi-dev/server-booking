@@ -3,35 +3,28 @@
    <div class="head">
       <p>Hãy điền đầy đủ các trường dưới đây của chúng tôi</p>
    </div>
-   <form class="form" action="/api/tour" method="post">
+   <form class="form" action="/api/tour" method="post" enctype="multipart/form-data">
       <div class="form__gr">
          <label for="name" class="form__label">Tên tour</label>
          <input id="name" name="name" class="form__input large" />
       </div>
-
       <div class="form__gr">
          <label for="description" class="form__label">Mô tả </label>
          <textarea id="description" name="description" class="form__input large"></textarea>
       </div>
+      {{!-- --}}
+      <h3>Lịch trình tour</h3>
       <div class="form__gr">
-         <label for="details" class="form__label">Chi tiết 1 </label>
-         <textarea id="details" name="details" class="form__input large"></textarea>
+         <label for="schedule" class="form__label">Ngày </label>
+         <textarea id="schedule" name="schedule" class="form__input large"></textarea>
       </div>
       <div class="form__gr">
-         <label for="details" class="form__label">Chi tiết 2 </label>
-         <textarea id="details" name="details" class="form__input large"></textarea>
+         <label for="schedule" class="form__label">Ngày 2 </label>
+         <textarea id="schedule" name="schedule" class="form__input large"></textarea>
       </div>
       <div class="form__gr">
-         <label for="details" class="form__label">Chi tiết 3 </label>
-         <textarea id="details" name="details" class="form__input large"></textarea>
-      </div>
-      <div class="form__gr">
-         <label for="details" class="form__label">Chi tiết 4 </label>
-         <textarea id="details" name="details" class="form__input large"></textarea>
-      </div>
-      <div class="form__gr">
-         <label for="details" class="form__label">Chi tiết 5 </label>
-         <textarea id="details" name="details" class="form__input large"></textarea>
+         <label for="schedule" class="form__label">Ngày 3 </label>
+         <textarea id="schedule" name="schedule" class="form__input large"></textarea>
       </div>
       <div class="form__gr">
          <label for="location" class="form__label">Địa chỉ</label>
@@ -53,8 +46,12 @@
       </div>
       <div class="form__gr">
          <div class="form__gr">
-            <label for="price" class="form__label">Giá tiền</label>
-            <input id="price" name="price" class="form__input large" />
+            <label for="price" class="form__label">Giá tiền người lớn</label>
+            <input id="price" name="price" class="form__input " />
+         </div>
+         <div class="form__gr">
+            <label for="price" class="form__label">Giá tiền trẻ em</label>
+            <input id="price" name="price" class="form__input " />
          </div>
          <div class="form__gr">
             <label for="maxGroupSize" class="form__label">Số người tham gia tối đa</label>
@@ -67,10 +64,7 @@
             <label for="startDate" class="form__label">Ngày bắt đầu</label>
             <input type="date" id="startDate" name="startDate" class="form__input " />
          </div>
-         <div class="form__gr">
-            <label for="endDate" class="form__label">Ngày kết thúc</label>
-            <input type="date" id="endDate" name="endDate" class="form__input " />
-         </div>
+
          <div class="form__gr">
             <label for="guides" class="form__label">Người dẫn đoàn</label>
             <input id="guides" name="guides" class="form__input " />
@@ -84,10 +78,7 @@
          </div>
       </div>
       <div class="form__gr">
-         <div class="form__gr">
-            <label for="hightlights" class="form__label">Điểm nổi bật</label>
-            <input id="hightlights" name="hightlights" class="form__input " />
-         </div>
+
 
          <div class="form__gr">
             <label for="difficulty" class="form__label">Độ khó của tour</label>
@@ -100,8 +91,8 @@
          </div>
 
       </div>
-      <div class="form__gr">
-         <label for="included" class="form__label">Dịch vụ có trong tour</label>
+      <h3>Dịch vụ có trong tour</h3>
+      <div class="form__gr flex-wrap">
          <div class="form__gr">
             <h4>Miễn phí 1 nước uống theo chai (1 chai/ 1 người)</h4>
             <input id="included" name="included" class="form__input " checked type="checkbox"
@@ -111,6 +102,11 @@
             <h4>Một hoặc nhiều hơn hướng dẫn viên du lịch cho hành trình của bạn( trên 5 người )</h4>
             <input id="included" name="included" class="form__input " checked type="checkbox"
                value="Một hoặc nhiều hơn hướng dẫn viên du lịch cho hành trình của bạn( trên 5 người )">
+         </div>
+         <div class="form__gr">
+            <h4>Chi phí vé vào các nơi tham quan</h4>
+            <input id="included" name="included" class="form__input " checked type="checkbox"
+               value="Chi phí vé vào các nơi tham quan">
          </div>
          <div class="form__gr">
             <h4>Dịch vụ ăn uống trọn gói</h4>
@@ -131,10 +127,15 @@
             <input id="included" name="included" class="form__input " type="checkbox"
                value="Dịch vụ tổng hợp( tất cả mọi thứ liên quan đến tour này)">
          </div>
+
       </div>
+      <h4>Thêm dịch vụ riêng</h4>
       <div class="form__gr">
-         <label for="images" class="form__label">Ảnh tour (5 ảnh)</label>
-         <input type="file" multiple="true" id="images" name="images" class="form__input " />
+         <textarea id="included" name="included" class="form__input"></textarea>
+      </div>
+      <div class=" form__gr">
+         <label class="form__label">Ảnh tour (5 ảnh)</label>
+         <input type="file" multiple name="images" class="form__input" />
       </div>
       <button type="submit " class="button primary mt-2">Thêm mới</button>
    </form>

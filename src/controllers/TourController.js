@@ -31,28 +31,23 @@ const getTours = async (req, res, next) => {
   }
 };
 
-const createTours = async (req, res, next) => {
+const createTours = async (req, res) => {
   try {
-    const img = req.files.map((img) => img.path);
-    const formData = req.body;
-    formData.images = img;
-    formData.createdAt = new Date().toLocaleDateString("vi-VN");
+    const formData = {
+      ...req.body,
+      images: req.files.map((img) => img.path),
+      createdAt: new Date().toLocaleDateString("vi-VN"),
+    };
     const tour = new Tour(formData);
-    tour
-      .save()
-      .then(() => {
-        res.status(200).json({
-          messages: " tạo mới tour thành công",
-          tour: tour,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    await tour.save();
+    res.status(StatusCodes.CREATED).json({
+      messages: "tạo mới tour thành công",
+      tour: tour,
+    });
   } catch (error) {
-    res.status(400).json({
-      messages: " lỗi khi tạo mới tour",
-      error: error,
+    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+      messages: "lỗi khi tạo mới tour",
+      error: error.message,
     });
   }
 };
