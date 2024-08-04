@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const Hotel = require("../models/Hotel");
-const { mongooseArrays } = require("../utils/mongoose");
+const { mongooseArrays, mongoose } = require("../utils/mongoose");
 
 const getHotel = async (req, res, next) => {
   try {
@@ -13,14 +13,14 @@ const getHotel = async (req, res, next) => {
     }
     const hotel = await Hotel.find(listQuery).limit(limit);
     // Send response
-    if (tours.length > 0) {
-      res.status(StatusCodes.LOCKED).json({
+    if (hotel.length > 0) {
+      res.status(StatusCodes.OK).json({
         messages: "Lấy danh sách nhà nghỉ  thành công",
         data: mongooseArrays(hotel),
       });
     } else {
       res.status(StatusCodes.BAD_REQUEST).json({
-        messages: "Không có tour nào được tìm thấy",
+        messages: "Không có hotel nào được tìm thấy",
         data: [],
       });
     }
@@ -28,32 +28,42 @@ const getHotel = async (req, res, next) => {
     next(error);
   }
 };
+const getDetail = async (req, res, next) => {
+  try {
+    const slug = req.params.slug;
+    const hotel = await Hotel.findOne({
+      slug: slug,
+    }).exec();
+    res.status(StatusCodes.OK).json({
+      messages: "Lấy chi tiết hotel du lịch thành công",
+      data: mongoose(hotel),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 const createHotel = async (req, res, next) => {
   try {
-    const img = req.files.map((img) => img.path);
-    const formData = req.body;
-    formData.images = img;
-    formData.createdAt = new Date().toLocaleDateString("vi-VN");
+    const formData = {
+      ...req.body,
+      images: req.files.map((img) => img.path),
+      createdAt: new Date().toLocaleDateString("vi-VN"),
+    };
     const hotel = new Hotel(formData);
-    hotel
-      .save()
-      .then(() => {
-        res.status(200).json({
-          messages: " tạo mới hotel thành công",
-          hotel: hotel,
-        });
-      })
-      .catch((error) => {
-        next(error);
-      });
+    hotel.save();
+    res.status(StatusCodes.CREATED).json({
+      messages: "tạo mới hotel thành công",
+      hotel: hotel,
+    });
   } catch (error) {
-    res.status(400).json({
-      messages: " lỗi khi tạo mới hotel",
-      error: error,
+    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+      messages: "lỗi khi tạo mới hotel",
+      error: error.message,
     });
   }
 };
 module.exports = {
   getHotel,
+  getDetail,
   createHotel,
 };

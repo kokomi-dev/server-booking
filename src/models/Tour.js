@@ -11,6 +11,10 @@ const tourSchema = new mongoose.Schema({
     type: String,
     slug: "name",
   },
+  duration: {
+    type: Number,
+    required: true,
+  },
   city: {
     type: String,
     required: true,

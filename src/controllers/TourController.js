@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const Tour = require("../models/Tour");
-const { mongooseArrays } = require("../utils/mongoose");
+const { mongooseArrays, mongoose } = require("../utils/mongoose");
 
 const getTours = async (req, res, next) => {
   try {
@@ -30,13 +30,27 @@ const getTours = async (req, res, next) => {
     next(error);
   }
 };
-
+const getTourDetail = async (req, res, next) => {
+  try {
+    const slug = req.params.slug;
+    const tour = await Tour.findOne({
+      slug: slug,
+    }).exec();
+    res.status(StatusCodes.OK).json({
+      messages: "Lấy chi tiết tour du lịch thành công",
+      data: mongoose(tour),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 const createTours = async (req, res) => {
   try {
     const formData = {
       ...req.body,
       images: req.files.map((img) => img.path),
       createdAt: new Date().toLocaleDateString("vi-VN"),
+      startDate: req.body.startDate.toLocaleDateString("vi-VN"),
     };
     const tour = new Tour(formData);
     await tour.save();
@@ -81,4 +95,5 @@ module.exports = {
   updateTours,
   deleteTour,
   createTours,
+  getTourDetail,
 };

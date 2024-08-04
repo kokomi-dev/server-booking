@@ -16,6 +16,7 @@ const createTours = async (req, res, next) => {
     comment: Joi.array().items(Joi.object()),
     startDate: Joi.date().required(),
     guides: Joi.string(),
+    duration: Joi.number().required(),
     included: Joi.array().items(Joi.string()),
   });
   try {

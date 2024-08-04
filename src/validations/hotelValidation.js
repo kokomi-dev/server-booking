@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const Joi = require("joi");
-const createHotel = async (req, res) => {
+const createHotel = async (req, res, next) => {
   const validations = Joi.object({
     name: Joi.string().required().min(10).max(100).trim(),
     details: Joi.array().items.apply(Joi.string()).required(),
@@ -14,9 +14,7 @@ const createHotel = async (req, res) => {
   });
   try {
     await validations.validateAsync(req.body, { abortEarly: false });
-    res.status(StatusCodes.OK).json({
-      messages: "Createnew hotel success",
-    });
+    next();
   } catch (error) {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
       errors: new Error(error).message,
