@@ -30,6 +30,22 @@ const getTours = async (req, res, next) => {
     next(error);
   }
 };
+const searchResult = async (req, res, next) => {
+  try {
+    const address = req.query.address;
+    const tour = await Tour.find({
+      city: address,
+    });
+    res.status(StatusCodes.OK).json({
+      message: "Lấy danh sách tour ở " + req.query.address + " thành công",
+      data: mongooseArrays(tour),
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+};
 const getTourDetail = async (req, res, next) => {
   try {
     const slug = req.params.slug;
@@ -44,6 +60,7 @@ const getTourDetail = async (req, res, next) => {
     next(error);
   }
 };
+
 const createTours = async (req, res) => {
   try {
     const formData = {
@@ -96,4 +113,5 @@ module.exports = {
   deleteTour,
   createTours,
   getTourDetail,
+  searchResult,
 };

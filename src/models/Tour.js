@@ -11,6 +11,8 @@ const tourSchema = new mongoose.Schema({
     type: String,
     slug: "name",
   },
+  category: [{ type: Number }],
+
   duration: {
     type: Number,
     required: true,

@@ -5,8 +5,11 @@ const tourValidation = require("~/validations/tourValidation");
 const upload = require("../middlewares/multerUpload");
 // GET -api/tour - get data from table tours
 route.get("/", tourController.getTours);
+// GET -api/tour/searchresult?address=""
+route.get("/searchresult", tourController.searchResult);
 // GET -api/tour/:slug - get details tour
 route.get("/:slug", tourController.getTourDetail);
+
 // POST -api/tour - add new tour
 route.post(
   "/",

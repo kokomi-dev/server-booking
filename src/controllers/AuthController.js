@@ -1,41 +1,56 @@
 const bcrypt = require("bcrypt");
 const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
+require("dotenv").config;
+const { StatusCodes } = require("http-status-codes");
+
 const validatePasword = (password) => {
   return password.match(
-    // Tối thiểu tám ký tự, ít nhất một chữ cái, một số và một ký tự đặc biệt
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
   );
 };
 const register = async (request, response) => {
   try {
-    let bodyRequest = request.body;
-    if (request.file) {
-      return response.status(400).json({
+    let bodyRequest = request.body.data;
+
+    // if (request.file) {
+    //   return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+    //     status: "Error 400: Bad Request",
+    //     message: "img is required",
+    //   });
+    // }
+    if (!bodyRequest.firstname) {
+      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
         status: "Error 400: Bad Request",
-        message: "img is required",
+        message: "firstname is required",
       });
     }
-    if (!bodyRequest.name) {
-      return response.status(400).json({
+    if (!bodyRequest.lastname) {
+      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
         status: "Error 400: Bad Request",
-        message: "name is required",
+        message: "lastname is required",
       });
     }
     if (!bodyRequest.email) {
-      return response.status(400).json({
+      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
         status: "Error 400: Bad Request",
         message: "email is required",
       });
     }
+    if (!bodyRequest.numberPhone) {
+      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+        status: "Error 400: Bad Request",
+        message: "numberphone is required",
+      });
+    }
     if (!bodyRequest.password) {
-      return response.status(400).json({
+      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
         status: "Error 400: Bad Request",
         message: "password is required",
       });
     }
     if (!validatePasword(bodyRequest.password)) {
-      return response.status(400).json({
+      return response.status(StatusCodes.BAD_REQUEST).json({
         status: "Error 400: Bad Request",
         message: "password is not valid",
       });
@@ -44,20 +59,23 @@ const register = async (request, response) => {
     const user = await userModel.create({
       ...bodyRequest,
       password: hasPass,
-      img: request.file,
+      // img: request.file,
     });
     user.password = undefined;
-    return response.status(200).json({
+    return response.status(StatusCodes.OK).json({
       message: "register account successfully",
       user: user,
     });
   } catch (error) {
-    console.log(error);
+    return response.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
+      error: error,
+    });
   }
 };
 const login = async (request, response) => {
   try {
-    let bodyRequest = request.body;
+    let bodyRequest = request.body.data;
     const user = await userModel.findOne({ email: bodyRequest.email });
     if (user) {
       // đối cố thứ nhát là mật khẩu người dùng nhập , thứ 2 là mật khẩu của email được match  trong database user
@@ -66,7 +84,7 @@ const login = async (request, response) => {
         user.password
       );
       if (validPassword) {
-        const token = jwt.sign({ _id: user._id }, "kokomi_dev", {
+        const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY_JWT, {
           expiresIn: "100d",
         });
         user.password = undefined;
@@ -83,12 +101,31 @@ const login = async (request, response) => {
     console.log(error);
   }
 };
-const logout = async (request, response) => {
+const getCurrentUser = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: "Authorization header thiếu hoặc không đúng định dạng",
+    });
+  }
+  const token = authHeader.split(" ")[1];
   try {
-  } catch {}
+    const user = await jwt.verify(token, process.env.SECRET_KEY_JWT);
+    const userData = await userModel.findOne({ _id: user._id });
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thông tin người dùng thành công",
+      user: userData,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: error.message,
+      error: error,
+    });
+  }
 };
+
 module.exports = {
   register,
   login,
-  logout,
+  getCurrentUser,
 };
