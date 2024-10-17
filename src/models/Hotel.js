@@ -20,8 +20,26 @@ const hotelSchema = new mongoose.Schema({
   },
   comments: [
     {
-      content: String,
-      created: Date,
+      idUser: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+      name: {
+        type: String,
+      },
+      nameShow: {
+        type: String,
+      },
+      content: {
+        type: String,
+        required: true,
+      },
+      commentDate: {
+        type: Date,
+      },
+      ratingVote: {
+        type: Number,
+      },
     },
   ],
 });

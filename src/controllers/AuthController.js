@@ -3,6 +3,7 @@ const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 require("dotenv").config;
 const { StatusCodes } = require("http-status-codes");
+const { trusted } = require("mongoose");
 
 const validatePasword = (password) => {
   return password.match(
@@ -14,45 +15,51 @@ const register = async (request, response) => {
     let bodyRequest = request.body.data;
 
     // if (request.file) {
-    //   return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+    //   return response.status(StatusCodes.UNAUTHORIZED).json({
     //     status: "Error 400: Bad Request",
     //     message: "img is required",
     //   });
     // }
     if (!bodyRequest.firstname) {
-      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+      return response.status(StatusCodes.UNAUTHORIZED).json({
         status: "Error 400: Bad Request",
         message: "firstname is required",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     if (!bodyRequest.lastname) {
-      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+      return response.status(StatusCodes.UNAUTHORIZED).json({
         status: "Error 400: Bad Request",
         message: "lastname is required",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     if (!bodyRequest.email) {
-      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+      return response.status(StatusCodes.UNAUTHORIZED).json({
         status: "Error 400: Bad Request",
         message: "email is required",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     if (!bodyRequest.numberPhone) {
-      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+      return response.status(StatusCodes.UNAUTHORIZED).json({
         status: "Error 400: Bad Request",
         message: "numberphone is required",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     if (!bodyRequest.password) {
-      return response.status(StatusCodes.PAYMENT_REQUIRED).json({
+      return response.status(StatusCodes.UNAUTHORIZED).json({
         status: "Error 400: Bad Request",
         message: "password is required",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     if (!validatePasword(bodyRequest.password)) {
       return response.status(StatusCodes.BAD_REQUEST).json({
         status: "Error 400: Bad Request",
         message: "password is not valid",
+        code: StatusCodes.UNAUTHORIZED,
       });
     }
     const hasPass = await bcrypt.hash(bodyRequest.password, 10);
@@ -69,7 +76,7 @@ const register = async (request, response) => {
   } catch (error) {
     return response.status(StatusCodes.BAD_REQUEST).json({
       message: error.message,
-      error: error,
+      code: StatusCodes.UNAUTHORIZED,
     });
   }
 };
@@ -88,14 +95,24 @@ const login = async (request, response) => {
           expiresIn: "100d",
         });
         user.password = undefined;
+        response.cookie("token_jwt", token, {
+          httpOnly: true,
+          sameSite: "strict",
+        });
         response
           .status(200)
           .json({ message: "login is successfully", token: token, user: user });
       } else {
-        response.status(400).json({ error: "Password is valid!!!" });
+        response.status(400).json({
+          message: "Email hoặc mật khẩu chưa chính xác !",
+          code: StatusCodes.UNAUTHORIZED,
+        });
       }
     } else {
-      response.status(401).json({ error: "Email is valid!!!" });
+      response.status(400).json({
+        message: "Email hoặc mật khẩu chưa chính xác !",
+        code: StatusCodes.UNAUTHORIZED,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -124,8 +141,88 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const reqData = req.body.data;
+    const idUpdate = req.body.id;
+    const findUser = await userModel.findOne({ _id: idUpdate });
+    if (findUser) {
+      if (reqData.password === findUser.password) {
+        if (reqData.passwordNew === reqData.passwordNewConfirm) {
+          const hasPass = await bcrypt.hash(reqData.password, 10);
+          const userUpdate = await userModel.findByIdAndUpdate(
+            idUpdate,
+            {
+              $set: {
+                ...reqData,
+                email: findUser.email,
+                password: hasPass,
+                updated: new Date(),
+              },
+            },
+            { new: true }
+          );
+          if (userUpdate) {
+            res.status(StatusCodes.ACCEPTED).json(userUpdate);
+          } else {
+            res
+              .status(StatusCodes.NON_AUTHORITATIVE_INFORMATION)
+              .json("Thông tin mật khẩu không đúng");
+          }
+        } else {
+          res
+            .status(StatusCodes.CONFLICT)
+            .json("Mật khẩu mới không trùng khớp");
+        }
+      } else {
+        const userUpdate = await userModel.findByIdAndUpdate(
+          idUpdate,
+          {
+            $set: {
+              ...reqData,
+              email: findUser.email,
+              updated: new Date(),
+            },
+          },
+          { new: true }
+        );
+        if (userUpdate) {
+          res.status(StatusCodes.OK).json({
+            message: " Cập nhập tên người dùng thành công",
+            userUpdated: userUpdate,
+          });
+        } else {
+          return res.status(StatusCodes.CONFLICT).json({
+            message: "Lỗi khi đổi tên người dùng",
+          });
+        }
+      }
+    }
+    if (!user) {
+      return res.status(StatusCodes.BAD_REQUEST).send("User not found");
+    }
+    // res.status(StatusCodes.OK).json(user);
+  } catch (error) {}
+};
+
+const logout = async (req, res) => {
+  try {
+    // res.clearCookie("token_jwt");
+    res.status(StatusCodes.OK).json({
+      code: 200,
+      message: "Đăng xuất người dùng thành công",
+    });
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Lỗi khi dăng xuât",
+      error: error,
+    });
+  }
+};
 module.exports = {
   register,
   login,
   getCurrentUser,
+  updateUser,
+  logout,
 };

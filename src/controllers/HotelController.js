@@ -8,7 +8,7 @@ const getHotel = async (req, res, next) => {
     const query = req.query;
     // limit
     const limit = parseInt(query.limit) || 10;
-    if (query.trending === "true") {
+    if (query.fillter === "outstanding") {
       listQuery.isTrending = true;
     }
     const hotel = await Hotel.find(listQuery).limit(limit);
@@ -35,14 +35,15 @@ const getDetail = async (req, res, next) => {
       slug: slug,
     }).exec();
     res.status(StatusCodes.OK).json({
-      messages: "Lấy chi tiết hotel du lịch thành công",
+      messages: "Lấy chi tiết hotel  thành công",
       data: mongoose(hotel),
     });
   } catch (error) {
     next(error);
   }
 };
-const createHotel = async (req, res, next) => {
+
+const createHotel = async (req, res) => {
   try {
     const formData = {
       ...req.body,
@@ -62,8 +63,50 @@ const createHotel = async (req, res, next) => {
     });
   }
 };
+const searchResult = async (req, res) => {
+  try {
+    const address = req.query.address;
+    const hotel = await Hotel.find({
+      "city-slug": address,
+    });
+    res.status(StatusCodes.OK).json({
+      message: "Lấy danh sách hotel ở " + address + " thành công",
+      data: mongooseArrays(hotel),
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+};
+const getHotelBooked = async (req, res) => {
+  try {
+    const arr = req.body.arr;
+
+    const hotelBooked = await Hotel.find({
+      _id: { $in: arr },
+    });
+    // Send response
+    if (hotelBooked.length > 0) {
+      res.status(StatusCodes.OK).json({
+        messages: "Lấy danh sách địa điểm tham quan đã đặt thành công",
+        data: mongooseArrays(hotelBooked),
+      });
+    } else {
+      res.status(StatusCodes.NO_CONTENT).json({
+        messages:
+          "Không có địa điểm tham quan nào đã được đặt nào được tìm thấy",
+        data: [],
+      });
+    }
+  } catch (error) {
+    throw new Error("Lỗi khi gửi dữ liệu lên server");
+  }
+};
 module.exports = {
   getHotel,
   getDetail,
   createHotel,
+  searchResult,
+  getHotelBooked,
 };

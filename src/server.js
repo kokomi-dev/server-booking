@@ -7,6 +7,8 @@ const errorHandling = require("~/middlewares/errorHandling");
 const env = require("~/config/enviroment");
 const { CONNECT_DB } = require("~/config/mongosee");
 const hbs = require("express-handlebars").engine;
+const cookieParser = require("cookie-parser");
+
 const path = require("path");
 const START_SERVICE = () => {
   const app = express();
@@ -27,7 +29,7 @@ const START_SERVICE = () => {
       },
     })
   );
-
+  app.use(cookieParser());
   // Thiết lập thư mục views
   app.set("views", __dirname + "/views");
   app.use(express.static("public"));

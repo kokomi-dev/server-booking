@@ -1,8 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const nodemailer = require("nodemailer");
 
-const code = Math.floor(100000 + Math.random() * 900000);
-
 const sendEmail = async (req, res) => {
   const { email } = req.body;
   try {
@@ -18,7 +16,7 @@ const sendEmail = async (req, res) => {
     const info = await transporter.sendMail({
       from: '"KoKoTravel 👻" <nguyenthean12062002@gmail.com>',
       to: email,
-      subject: "Xác thực người dùng!",
+      subject: "Xác thực thanh toán!",
       text: "Chào mừng bạn đến với KoKoTravel",
       html: `
          <p>KoKoTravel</p>
@@ -34,7 +32,7 @@ const sendEmail = async (req, res) => {
     return res.status(StatusCodes.OK).json({
       idEmail: info.messageId,
       message: "Gửi email thành công",
-      code: code,
+      code: Math.floor(100000 + Math.random() * 900000),
       toEmail: email,
     });
   } catch (error) {

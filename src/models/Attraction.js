@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const slug = require("mongoose-slug-generator");
 mongoose.plugin(slug);
 
-const tourSchema = new mongoose.Schema({
+const attractionSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -11,11 +11,9 @@ const tourSchema = new mongoose.Schema({
     type: String,
     slug: "name",
   },
-  category: [{ type: Number }],
 
   duration: {
     type: Number,
-    required: true,
   },
   city: {
     type: String,
@@ -41,8 +39,19 @@ const tourSchema = new mongoose.Schema({
     },
   ],
   location: {
-    type: String,
-    required: true,
+    province: {
+      id: Number,
+      name: String,
+    },
+    district: {
+      id: Number,
+      name: String,
+    },
+    commune: {
+      id: Number,
+      name: String,
+    },
+    detail: String,
   },
   createdAt: {
     type: String,
@@ -57,7 +66,6 @@ const tourSchema = new mongoose.Schema({
   },
   difficulty: {
     type: String,
-    enum: ["dễ", "trung bình", "khó"],
     required: true,
   },
   isTrending: {
@@ -74,17 +82,25 @@ const tourSchema = new mongoose.Schema({
   },
   comments: [
     {
-      user: {
+      idUser: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
+      },
+      name: {
+        type: String,
+      },
+      nameShow: {
+        type: String,
       },
       content: {
         type: String,
         required: true,
       },
-      date: {
+      commentDate: {
         type: Date,
-        default: Date.now,
+      },
+      ratingVote: {
+        type: Number,
       },
     },
   ],
@@ -92,4 +108,4 @@ const tourSchema = new mongoose.Schema({
   included: [String], // Các dịch vụ bao gồm trong tour
 });
 
-module.exports = mongoose.model("Tour", tourSchema);
+module.exports = mongoose.model("Attraction", attractionSchema);

@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const Joi = require("joi");
-const createTours = async (req, res, next) => {
+const createAttraction = async (req, res, next) => {
   const validations = Joi.object({
     name: Joi.string().min(10).max(100).trim(),
     description: Joi.string().required().min(50).max(1000).trim(),
@@ -29,5 +29,5 @@ const createTours = async (req, res, next) => {
   }
 };
 module.exports = {
-  createTours,
+  createAttraction,
 };
