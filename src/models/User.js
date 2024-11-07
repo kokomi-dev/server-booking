@@ -13,15 +13,30 @@ const User = new mongoose.Schema({
   password: { type: String, required: true },
   createdAt: { type: Date, date: Date.now() },
   updatedAt: { type: Date },
-  booked: [
+  bookedAttractions: [
     {
       tripId: { type: String },
-      category: { type: String },
       bookingDate: { type: Date },
       orderId: { type: String },
       amount: { type: Number },
     },
   ],
+  bookedHotels: [
+    {
+      tripId: { type: String },
+      bookingDate: { type: Date },
+      orderId: { type: String },
+      amount: { type: Number },
+    },
+  ],
+  notifys: [
+    {
+      title: { type: String },
+      time: { type: String },
+      img: { type: String },
+    },
+  ],
+  roles: { type: String, default: "normal" },
 });
 
 module.exports = mongoose.model("User", User);

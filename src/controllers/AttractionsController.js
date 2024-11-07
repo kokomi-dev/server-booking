@@ -1,6 +1,13 @@
 const { StatusCodes } = require("http-status-codes");
 const Attraction = require("../models/Attraction");
 const { mongooseArrays, mongoose } = require("../utils/mongoose");
+export const convertToSlug = (text) => {
+  text = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  text = text.toLowerCase();
+  text = text.replace(/[^a-z0-9\s-]/g, "");
+  text = text.trim().replace(/\s+/g, "-");
+  return text;
+};
 
 const getAttractions = async (req, res, next) => {
   try {
@@ -52,20 +59,29 @@ const searchResult = async (req, res) => {
 const getAttractionsDetail = async (req, res) => {
   try {
     const slug = req.params.slug;
-    const attraction = await Attraction.findOne({
-      slug: slug,
-    }).exec();
-    res.status(StatusCodes.OK).json({
-      messages: "Lấy chi tiết địa điểm du lịch du lịch thành công",
-      data: mongoose(attraction),
-    });
+    const attraction = await Attraction.findOne({ slug }).exec();
+
+    if (attraction) {
+      res.status(StatusCodes.OK).json({
+        message: "Lấy chi tiết địa điểm tham quan thành công",
+        code: StatusCodes.OK,
+        data: mongoose(attraction),
+      });
+    } else {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Không tìm thấy địa điểm tham quan này",
+        code: StatusCodes.NOT_FOUND,
+        data: null,
+      });
+    }
   } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      messages: "Lỗi khi lấy dữ liệu chi tiết địa điểm du lịch ",
-      error: error,
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Đã xảy ra lỗi máy chủ",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
     });
   }
 };
+
 const getAttractionBooked = async (req, res) => {
   try {
     const arr = req.body.arr;
@@ -95,16 +111,24 @@ const createAttraction = async (req, res) => {
       ...req.body,
       images: req.files.map((img) => img.path),
       createdAt: new Date().toLocaleDateString("vi-VN"),
-      startDate: req.body.startDate.toLocaleDateString("vi-VN"),
+      comments: [],
+      location: {
+        detail: req.body.location_detail,
+        province_id: req.body.location_province_id,
+        district_id: req.body.location_district_id,
+        commune_id: req.body.location_commune_id,
+      },
     };
     const attraction = new Attraction(formData);
     await attraction.save();
-    res.status(StatusCodes.CREATED).json({
+    return res.status(StatusCodes.CREATED).json({
+      code: StatusCodes.CREATED,
       messages: "tạo mới  địa điểm du lịch thành công",
       attraction: attraction,
     });
   } catch (error) {
-    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      code: StatusCodes.BAD_REQUEST,
       messages: "lỗi khi tạo mới  địa điểm du lịch",
       error: error.message,
     });
@@ -112,7 +136,6 @@ const createAttraction = async (req, res) => {
 };
 const updateAttraction = async (req, res, next) => {
   const img = req.files.map((img) => img.path);
-
   try {
     await Attraction.updateOne(
       { id: req.params.id },

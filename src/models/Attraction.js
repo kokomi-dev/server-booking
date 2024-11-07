@@ -11,7 +11,6 @@ const attractionSchema = new mongoose.Schema({
     type: String,
     slug: "name",
   },
-
   duration: {
     type: Number,
   },
@@ -19,7 +18,7 @@ const attractionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  arena: {
+  "city-slug": {
     type: String,
     required: true,
   },
@@ -39,19 +38,10 @@ const attractionSchema = new mongoose.Schema({
     },
   ],
   location: {
-    province: {
-      id: Number,
-      name: String,
-    },
-    district: {
-      id: Number,
-      name: String,
-    },
-    commune: {
-      id: Number,
-      name: String,
-    },
-    detail: String,
+    province_id: { type: String },
+    district_id: { type: String },
+    commune_id: { type: String },
+    detail: { type: String },
   },
   createdAt: {
     type: String,
@@ -72,7 +62,8 @@ const attractionSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
-  ratingsQuantity: {
+  cancelFree: { type: Boolean, required: true },
+  rating: {
     type: Number,
     default: 4.5,
   },
@@ -105,7 +96,7 @@ const attractionSchema = new mongoose.Schema({
     },
   ],
   images: [String],
-  included: [String], // Các dịch vụ bao gồm trong tour
+  included: [String],
 });
 
 module.exports = mongoose.model("Attraction", attractionSchema);

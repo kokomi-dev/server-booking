@@ -1,5 +1,4 @@
 const axios = require("axios").default;
-const express = require("express"); // npm install express
 const qs = require("qs");
 const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
@@ -13,7 +12,7 @@ const config = {
 };
 
 const sendRequestPay = async (req, res) => {
-  const { amount, userId, tripId, category } = req.body;
+  const { amount, userId, tripId, category, img } = req.body;
   const embed_data = {
     redirecturl: "http://localhost:3000/attractions",
   };
@@ -29,8 +28,7 @@ const sendRequestPay = async (req, res) => {
     amount: amount,
     description: `KokoTravel - Payment for the order #${transID}`,
     bank_code: "",
-    callback_url:
-      "https://0743-113-23-50-216.ngrok-free.app/api/pay/callback-payment-url",
+
     userId: userId,
   };
 
@@ -52,17 +50,47 @@ const sendRequestPay = async (req, res) => {
   try {
     const result = await axios.post(config.endpoint, null, { params: order });
     if (result && result.data) {
-      user.booked = [
-        {
-          tripId: tripId,
-          category: category,
-          orderId: order.app_trans_id,
-          bookingDate: new Date(),
-          amount,
-        },
-        ...user.booked,
-      ];
-      await user.save();
+      const user = await User.findById(userId);
+      if (category === "attraction") {
+        user.bookedAttractions = [
+          {
+            tripId: tripId,
+            orderId: order.app_trans_id,
+            bookingDate: new Date(),
+            amount,
+          },
+          ...user.bookedAttractions,
+        ];
+        user.notifys = [
+          {
+            title: "Đặt vé tham quan thành công",
+            time: new Date(),
+            img,
+          },
+          ...user.notifys,
+        ];
+        await user.save();
+      }
+      if (category === "hotel") {
+        user.bookedHotels = [
+          {
+            tripId: tripId,
+            orderId: order.app_trans_id,
+            bookingDate: new Date(),
+            amount,
+          },
+          ...user.bookedHotels,
+        ];
+        user.notifys = [
+          {
+            title: "Đặt nơi lưu trú thành công",
+            time: new Date(),
+            img: img,
+          },
+          ...user.notifys,
+        ];
+        await user.save();
+      }
     }
     res.status(StatusCodes.OK).json({
       message: "Tạo url thanh toán thành công",

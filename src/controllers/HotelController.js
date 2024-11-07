@@ -34,30 +34,79 @@ const getDetail = async (req, res, next) => {
     const hotel = await Hotel.findOne({
       slug: slug,
     }).exec();
-    res.status(StatusCodes.OK).json({
-      messages: "Lấy chi tiết hotel  thành công",
-      data: mongoose(hotel),
-    });
+    if (hotel) {
+      res.status(StatusCodes.OK).json({
+        messages: "Lấy chi tiết hotel  thành công",
+        code: StatusCodes.OK,
+        data: mongoose(hotel),
+      });
+    } else {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "Không tìm thấy chi tiết chỗ nghỉ",
+        code: StatusCodes.NOT_FOUND,
+        data: null,
+      });
+    }
   } catch (error) {
-    next(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Đã xảy ra lỗi máy chủ",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
   }
 };
 
 const createHotel = async (req, res) => {
   try {
+    let infoRoom = [];
+    await Object.keys(req.body).forEach((key) => {
+      const match = key.match(/^infoRoom\[(\d+)]\[(\w+)]$/);
+      if (match) {
+        const index = parseInt(match[1], 10);
+        const field = match[2];
+        if (!infoRoom[index]) {
+          infoRoom[index] = {
+            name: "",
+            detail: "",
+            price: 0,
+            numberPeople: 1,
+            sale: 0,
+            isAddChildren: false,
+          };
+        }
+        infoRoom[index][field] = req.body[key];
+      }
+    });
+    await infoRoom.forEach((room) => {
+      room.price = parseFloat(room.price);
+      room.numberPeople = parseInt(room.numberPeople, 10);
+      room.sale = parseFloat(room.sale);
+      room.isAddChildren === "false" ? false : true;
+    });
+
     const formData = {
       ...req.body,
       images: req.files.map((img) => img.path),
       createdAt: new Date().toLocaleDateString("vi-VN"),
+      cancelFree: req.body.cacelFree === "false" ? false : true,
+      type: Number(req.body.type),
+      comments: [],
+      listRooms: req.body.infoRoom,
+      location: {
+        detail: parseInt(req.body.location_detail),
+        province_id: parseInt(req.body.location_province_id),
+        district_id: parseInt(req.body.location_district_id),
+        commune_id: parseInt(req.body.location_commune_id),
+      },
+      isFavorite: false,
     };
     const hotel = new Hotel(formData);
-    hotel.save();
+    await hotel.save();
     res.status(StatusCodes.CREATED).json({
       messages: "tạo mới hotel thành công",
       hotel: hotel,
     });
   } catch (error) {
-    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+    res.status(StatusCodes.BAD_REQUEST).json({
       messages: "lỗi khi tạo mới hotel",
       error: error.message,
     });
@@ -82,7 +131,6 @@ const searchResult = async (req, res) => {
 const getHotelBooked = async (req, res) => {
   try {
     const arr = req.body.arr;
-
     const hotelBooked = await Hotel.find({
       _id: { $in: arr },
     });
@@ -93,7 +141,7 @@ const getHotelBooked = async (req, res) => {
         data: mongooseArrays(hotelBooked),
       });
     } else {
-      res.status(StatusCodes.NO_CONTENT).json({
+      res.status(StatusCodes.NOT_FOUND).json({
         messages:
           "Không có địa điểm tham quan nào đã được đặt nào được tìm thấy",
         data: [],

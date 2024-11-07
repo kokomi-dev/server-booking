@@ -14,7 +14,7 @@ route.post("/getTourBooked", attractionsController.getAttractionBooked);
 route.post(
   "/",
   upload.array("images", 5),
-  attraction.createAttraction,
+  // attraction.createAttraction,
   attractionsController.createAttraction
 );
 // GET -api/tour/create - get view handlebars create tour

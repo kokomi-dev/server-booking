@@ -3,12 +3,26 @@ const userModel = require("../models/User");
 const jwt = require("jsonwebtoken");
 require("dotenv").config;
 const { StatusCodes } = require("http-status-codes");
-const { trusted } = require("mongoose");
+const { mongooseArrays } = require("~/utils/mongoose");
 
 const validatePasword = (password) => {
   return password.match(
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
   );
+};
+const getAllUser = async (req, res) => {
+  try {
+    const userData = await userModel.find({});
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy tất cả người dùng thành công",
+      data: mongooseArrays(userData),
+    });
+  } catch (error) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      message: error.message,
+      error: error,
+    });
+  }
 };
 const register = async (request, response) => {
   try {
@@ -100,18 +114,18 @@ const login = async (request, response) => {
           sameSite: "strict",
         });
         response
-          .status(200)
+          .status(StatusCodes.OK)
           .json({ message: "login is successfully", token: token, user: user });
       } else {
-        response.status(400).json({
+        response.status(StatusCodes.NOT_FOUND).json({
           message: "Email hoặc mật khẩu chưa chính xác !",
-          code: StatusCodes.UNAUTHORIZED,
+          code: StatusCodes.NOT_FOUND,
         });
       }
     } else {
-      response.status(400).json({
+      response.status(StatusCodes.NOT_FOUND).json({
         message: "Email hoặc mật khẩu chưa chính xác !",
-        code: StatusCodes.UNAUTHORIZED,
+        code: StatusCodes.NOT_FOUND,
       });
     }
   } catch (error) {
@@ -225,4 +239,5 @@ module.exports = {
   getCurrentUser,
   updateUser,
   logout,
+  getAllUser,
 };

@@ -44,9 +44,8 @@ const START_SERVICE = () => {
   // middleware => handle event erros
   app.use(errorHandling);
   // listen server on the port local
-  const PORT = env.PORT || 8080;
-  app.listen(PORT, () => {
-    console.log(`3.Server is running  ${PORT}`);
+  app.listen(env.LOCAL_PORT, () => {
+    console.log(`3.Server is running  ${env.LOCAL_PORT}`);
   });
 };
 (async () => {
