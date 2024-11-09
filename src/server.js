@@ -10,8 +10,10 @@ const hbs = require("express-handlebars").engine;
 const cookieParser = require("cookie-parser");
 
 const path = require("path");
+const { corsOption } = require("./config/core");
 const START_SERVICE = () => {
   const app = express();
+  app.use(cors(corsOption));
 
   // view engine handlebars
   app.set("view engine", "hbs");
@@ -38,7 +40,6 @@ const START_SERVICE = () => {
   // Middleware  URL-encoded and JSON
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(express.json());
-  app.use(cors());
   // route
   route(app);
   // middleware => handle event erros
@@ -59,3 +60,4 @@ const START_SERVICE = () => {
     process.exit(0);
   }
 })();
+// node ./build/src/server.js

@@ -9,6 +9,6 @@ const env = {
 
   NODE_MODE: process.env.NODE_MODE,
 
-  LOCAL_PORT: 8080,
+  LOCAL_PORT: process.env.LOCAL_PORT,
 };
 module.exports = env;

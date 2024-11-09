@@ -5,10 +5,11 @@
   "main": "./src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cross-env NODE_MODE=dev nodemon --exec babel-node ./src/server.js",
-    "build-bael": "babel ./src -d ./build/src",
-    "build": "npm run clean && node ./build/src/server.js",
-    "production": "npm run build && cross-env NODE_MODE=production node ./build/src/server.js "
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel ./src -d ./build/src",
+    "build": "npm run clean && npm run build-babel",
+    "production": "npm run build && node ./build/src/server.js",
+    "dev": "nodemon --exec ./node_modules/.bin/babel-node ./src/server.js"
   },
   "author": "kokomi dev - nguyễn thế an",
   "license": "ISC",
@@ -50,7 +51,7 @@
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.7",
+    "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.24.7",
     "@eslint/js": "^9.6.0",
     "eslint": "^9.6.0"
