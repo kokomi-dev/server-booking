@@ -10,10 +10,9 @@ const hbs = require("express-handlebars").engine;
 const cookieParser = require("cookie-parser");
 
 const path = require("path");
-const { corsOption } = require("./config/core");
 const START_SERVICE = () => {
   const app = express();
-  app.use(cors(corsOption));
+  app.use(cors());
 
   // view engine handlebars
   app.set("view engine", "hbs");
