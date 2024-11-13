@@ -1,5 +1,9 @@
 const env = require("./enviroment");
-const WHILE_LIST = ["http://localhost:3000"];
+const WHILE_LIST = [
+  "http://localhost:3000",
+  "https://server-booking-cx30.onrender.com/",
+  "https://web-booking-chi.vercel.app/",
+];
 
 export const corsOption = {
   origin: function (origin, callback) {
