@@ -8,7 +8,6 @@ export const convertToSlug = (text) => {
   text = text.trim().replace(/\s+/g, "-");
   return text;
 };
-
 const getAttractions = async (req, res, next) => {
   try {
     const listQuery = {};
