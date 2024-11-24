@@ -14,7 +14,7 @@ const config = {
 const sendRequestPay = async (req, res) => {
   const { amount, userId, tripId, category, img } = req.body;
   const embed_data = {
-    redirecturl: "http://localhost:3000/attractions",
+    redirecturl: process.env.VNPAY_RETURN_URL,
   };
   const items = [{}];
   const transID = Math.floor(Math.random() * 1000000);
