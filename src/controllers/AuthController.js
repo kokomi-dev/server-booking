@@ -106,7 +106,7 @@ const login = async (request, response) => {
       );
       if (validPassword) {
         const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY_JWT, {
-          expiresIn: "100d",
+          expiresIn: "15d",
         });
         user.password = undefined;
         response.cookie("token_jwt", token, {

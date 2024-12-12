@@ -80,7 +80,6 @@ const getAttractionsDetail = async (req, res) => {
     });
   }
 };
-
 const getAttractionBooked = async (req, res) => {
   try {
     const arr = req.body.arr;
@@ -133,19 +132,28 @@ const createAttraction = async (req, res) => {
     });
   }
 };
-const updateAttraction = async (req, res, next) => {
-  const img = req.files.map((img) => img.path);
-  try {
-    await Attraction.updateOne(
-      { id: req.params.id },
-      { ...req.body, images: img }
-    );
-    res.status(200).json({
-      messages: "Cập nhật thành công  địa điểm du lịch du lịch",
-    });
-  } catch (error) {
-    next(error);
-  }
+const updateAttraction = async (req, res) => {
+  console.log(req.body);
+  // try {
+  //   const formData = {
+  //     ...req.body,
+  //   };
+  //   const attraction = await Attraction.findByIdAndUpdate(
+  //     req.params.id,
+  //     formData
+  //   );
+  //   return res.status(StatusCodes.OK).json({
+  //     code: StatusCodes.CREATED,
+  //     messages: "cập nhật địa điểm du lịch thành công",
+  //     attraction: attraction,
+  //   });
+  // } catch (error) {
+  //   return res.status(StatusCodes.BAD_REQUEST).json({
+  //     code: StatusCodes.BAD_REQUEST,
+  //     messages: "lỗi khi cập nhật địa điểm du lịch",
+  //     error: error.message,
+  //   });
+  // }
 };
 const deleteAttraction = async (req, res, next) => {
   try {

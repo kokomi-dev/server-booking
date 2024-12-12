@@ -5,6 +5,17 @@ const attraction = require("~/validations/attractionValidation");
 const upload = require("../middlewares/multerUpload");
 // GET -api/tour - get data from table tours
 route.get("/", attractionsController.getAttractions);
+route.get("/keep-server-live", (req, res) => {
+  res.json({
+    code: 200,
+    message: "server đã được ping đến",
+    data: [
+      {
+        query: "access thành cống",
+      },
+    ],
+  });
+});
 // GET -api/tour/searchresult?address=""
 route.get("/searchresult", attractionsController.searchResult);
 // GET -api/tour/:slug - get details tour

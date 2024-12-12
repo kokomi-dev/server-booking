@@ -58,7 +58,7 @@ const getDetail = async (req, res, next) => {
 const createHotel = async (req, res) => {
   try {
     let infoRoom = [];
-    await Object.keys(req.body).forEach((key) => {
+    Object.keys(req.body).forEach((key) => {
       const match = key.match(/^infoRoom\[(\d+)]\[(\w+)]$/);
       if (match) {
         const index = parseInt(match[1], 10);
@@ -66,7 +66,7 @@ const createHotel = async (req, res) => {
         if (!infoRoom[index]) {
           infoRoom[index] = {
             name: "",
-            detail: "",
+            detail: [],
             price: 0,
             numberPeople: 1,
             sale: 0,
@@ -76,7 +76,7 @@ const createHotel = async (req, res) => {
         infoRoom[index][field] = req.body[key];
       }
     });
-    await infoRoom.forEach((room) => {
+    infoRoom.forEach((room) => {
       room.price = parseFloat(room.price);
       room.numberPeople = parseInt(room.numberPeople, 10);
       room.sale = parseFloat(room.sale);
@@ -102,6 +102,7 @@ const createHotel = async (req, res) => {
     const hotel = new Hotel(formData);
     await hotel.save();
     res.status(StatusCodes.CREATED).json({
+      code: StatusCodes.CREATED,
       messages: "tạo mới hotel thành công",
       hotel: hotel,
     });
