@@ -9,26 +9,11 @@ const User = new mongoose.Schema({
     unique: true,
     match: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
   },
+  idCode: { type: String },
   numberPhone: { type: String },
   password: { type: String, required: true },
   createdAt: { type: Date, date: Date.now() },
   updatedAt: { type: Date },
-  bookedAttractions: [
-    {
-      tripId: { type: String },
-      bookingDate: { type: Date },
-      orderId: { type: String },
-      amount: { type: Number },
-    },
-  ],
-  bookedHotels: [
-    {
-      tripId: { type: String },
-      bookingDate: { type: Date },
-      orderId: { type: String },
-      amount: { type: Number },
-    },
-  ],
   notifys: [
     {
       title: { type: String },
@@ -36,7 +21,21 @@ const User = new mongoose.Schema({
       img: { type: String },
     },
   ],
-  roles: { type: String, default: "normal" },
+  isActive: { type: Boolean, required: true },
+  isUnitActive: { type: Boolean },
+  isNewbie: { type: Boolean, default: false },
+  roles: {
+    type: String,
+    required: true,
+    enum: ["admin", "partner", "custommer"],
+  },
+  groupId: [String],
+  infoUnit: {
+    activityArena: [String],
+    unitName: { type: String },
+    unitAddress: { type: String },
+    unitTaxCode: { type: String },
+  },
 });
 
 module.exports = mongoose.model("User", User);

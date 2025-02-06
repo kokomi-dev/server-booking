@@ -27,7 +27,7 @@ const sendComment = async (req, res) => {
       nameShow: nameShow,
       content: data.comment,
       ratingVote: data.vote,
-      commentDate: new Date(),
+      commentDate: new Date().toLocaleDateString("vi-VN"),
     });
     if (findItem.comments.length > 0) {
       const ratingComment = findItem.comments.reduce(

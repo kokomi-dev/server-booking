@@ -32,6 +32,9 @@ route.post(
 route.get("/create", (req, res) => {
   res.render("tours/createTour.hbs");
 });
+// Update status
+route.put("/status", attractionsController.updateStatusAttraction);
+
 // PUT -api/tour/:id - edit tour with the id-tour
 route.put(
   "/:id",

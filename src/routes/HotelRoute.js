@@ -11,12 +11,16 @@ route.post(
   hotelController.createHotel
 );
 route.get("/", hotelController.getHotel);
+route.delete("/:slug", hotelController.deleteHotel);
 
 route.get("/searchresult", hotelController.searchResult);
-route.post("/getHotelBooked", hotelController.getHotelBooked);
+route.put("/status", hotelController.updateStatusHotel);
+
 route.get("/:slug", hotelController.getDetail);
-route.get("/create", (req, res) => {
-  res.render("hotels/createHotel.hbs");
-});
+route.post("/getHotelBooked", hotelController.getHotelBooked);
+route.put("/edit/:slug", upload.array("images"), hotelController.updateHotel);
+route.post("/room/:slug", hotelController.createRoom);
+route.put("/room/:slug", hotelController.updateRoom);
+route.delete("/room", hotelController.deleteRoom);
 
 module.exports = route;
