@@ -43,7 +43,7 @@ const attractionSchema = new mongoose.Schema({
   },
   createdAt: { type: String },
   startDate: { type: String, required: true },
-  updatedAt: { type: String, default: null },
+  updatedAt: { type: String },
   maxGroupSize: { type: Number, required: true },
   difficulty: { type: String, required: true },
   isTrending: { type: Boolean, required: true },

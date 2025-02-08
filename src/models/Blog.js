@@ -49,17 +49,13 @@ const blogSchema = new mongoose.Schema({
   },
   comments: [
     {
-      user: {
-        type: String,
-        required: true,
-      },
-      comment: {
-        type: String,
-        required: true,
-      },
-      createdAt: {
-        type: Date,
-      },
+      idUser: { type: String, required: true },
+      name: { type: String, required: true },
+      nameShow: { type: String, required: true },
+      email: { type: String, required: true },
+      roles: { type: String, required: true },
+      content: { type: String, required: true },
+      commentDate: { type: String, required: true },
     },
   ],
 });

@@ -45,7 +45,7 @@ const getHotel = async (req, res) => {
       const hotel = await Hotel.find(listQuery).limit(limit);
       if (hotel.length > 0) {
         res.status(StatusCodes.OK).json({
-          messages: "Lấy danh sách nhà nghỉ  thành công",
+          messages: "Lấy danh sách lưu trú  thành công",
           data: mongooseArrays(hotel),
         });
       } else {

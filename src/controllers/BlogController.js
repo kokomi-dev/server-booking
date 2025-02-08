@@ -5,8 +5,7 @@ const Blog = require("../models/Blog");
 
 const getAllBlog = async (req, res) => {
   try {
-    const { roles, unitCode, isDraft } = req.query;
-
+    const { roles, unitCode, isDraft, isTrending } = req.query;
     if (roles === "admin" && isDraft === "false") {
       const data = await Blog.find({
         isDraft: isDraft,
@@ -28,6 +27,21 @@ const getAllBlog = async (req, res) => {
         listBlogs: mongooseArrays(data),
       });
     }
+    let filter = { isDraft: false };
+
+    if (isTrending === "true") {
+      filter.isTrending = true;
+    }
+    if (unitCode) {
+      filter.unitCode = unitCode;
+    }
+
+    const data = await Blog.find(filter);
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thành công danh sách bài viết",
+      code: StatusCodes.OK,
+      listBlogs: mongooseArrays(data),
+    });
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "Lôi khi lấy dữ liệu",
@@ -127,4 +141,81 @@ const delBlog = async (req, res) => {
     });
   }
 };
-export { getAllBlog, createBlog, editBlog, delBlog, getDetailBlog };
+// LIKE BLOG
+const updateLikeBlog = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const blog = await Blog.findByIdAndUpdate(
+      id,
+      {
+        $inc: { likes: 1 },
+        updatedAt: new Date().toLocaleDateString("vi-VN"),
+      },
+      { new: true }
+    );
+    if (blog) {
+      return res.status(StatusCodes.OK).json({
+        message: "Cập nhật thành công ",
+        blogUpdated: blog,
+        code: StatusCodes.OK,
+      });
+    }
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Cập nhật không thành công",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+// COMMENTS BLOG
+const postCommentBlog = async (req, res) => {
+  const idBlog = req.params.id;
+  const { email, roles, id, name, content, nameShow } = req.body.data;
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      idBlog,
+      {
+        $push: {
+          comments: {
+            idUser: id,
+            name,
+            nameShow,
+            email,
+            roles,
+            content,
+            commentDate: new Date().toLocaleDateString("vi-VN"),
+          },
+        },
+      },
+      { new: true }
+    );
+    if (!updatedBlog) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Bài viết không tồn tại",
+        code: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      message: "Bình luận thành công",
+      comment: req.body.data,
+      code: StatusCodes.OK,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Bình luận không thành công",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+      err: error.message,
+    });
+  }
+};
+
+export {
+  getAllBlog,
+  createBlog,
+  editBlog,
+  delBlog,
+  getDetailBlog,
+  updateLikeBlog,
+  postCommentBlog,
+};
