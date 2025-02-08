@@ -7,5 +7,7 @@ route.get("/:slug", blogController.getDetailBlog);
 route.put("/edit/:id", blogController.editBlog);
 route.delete("/delete", blogController.delBlog);
 route.get("/", blogController.getAllBlog);
+route.post("/likes/:id", blogController.updateLikeBlog);
+route.post("/comments/:id", blogController.postCommentBlog);
 
 module.exports = route;
