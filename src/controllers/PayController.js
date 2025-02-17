@@ -3,7 +3,9 @@ const qs = require("qs");
 const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const moment = require("moment");
-const User = require("~/models/User");
+const BookedAttractions = require("../models/BookedAttractions");
+const BookedHotels = require("../models/BookedHotels");
+
 const config = {
   app_id: "2554",
   key1: "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn",
@@ -12,7 +14,21 @@ const config = {
 };
 
 const sendRequestPay = async (req, res) => {
-  const { amount, userId, tripId, category, img } = req.body;
+  const {
+    amount,
+    userId,
+    tripId,
+    category,
+    img,
+    numberTicketAdult,
+    numberTicketChildren,
+    unitCode,
+    startDate,
+    hour,
+    numberRoom,
+    dateTo,
+    dateFrom,
+  } = req.body;
   const embed_data = {
     redirecturl: process.env.VNPAY_RETURN_URL,
   };
@@ -28,7 +44,7 @@ const sendRequestPay = async (req, res) => {
     amount: amount,
     description: `KokoTravel - Payment for the order #${transID}`,
     bank_code: "",
-
+    img,
     userId: userId,
   };
 
@@ -50,53 +66,57 @@ const sendRequestPay = async (req, res) => {
   try {
     const result = await axios.post(config.endpoint, null, { params: order });
     if (result && result.data) {
-      const user = await User.findById(userId);
       if (category === "attraction") {
-        user.bookedAttractions = [
-          {
-            tripId: tripId,
-            orderId: order.app_trans_id,
-            bookingDate: new Date(),
-            amount,
+        const bookedAtt = {
+          slugBooked: tripId,
+          idUser: userId,
+          unitCode: unitCode,
+          paymentMethod: "zalopay",
+          paymentUrl: order.app_trans_id,
+          totalBooked: Number(amount),
+          numberOfTicketsBooked: {
+            adult: Number(numberTicketAdult),
+            children: Number(numberTicketChildren),
           },
-          ...user.bookedAttractions,
-        ];
-        user.notifys = [
-          {
-            title: "Đặt vé tham quan thành công",
-            time: new Date(),
-            img,
-          },
-          ...user.notifys,
-        ];
-        await user.save();
+          hourStart: hour,
+          dateStart: startDate,
+          bookedDate: new Date(),
+          img: img,
+        };
+        const bookedAttractions = new BookedAttractions(bookedAtt);
+        await bookedAttractions.save();
       }
       if (category === "hotel") {
-        user.bookedHotels = [
-          {
-            tripId: tripId,
-            orderId: order.app_trans_id,
-            bookingDate: new Date(),
-            amount,
+        const bookedAtt = {
+          slugBooked: tripId,
+          idUser: userId,
+          unitCode: unitCode,
+          paymentMethod: "zalopay",
+          paymentUrl: order.app_trans_id,
+          totalBooked: Number(amount),
+          numberOfTicketsBooked: {
+            adult: Number(numberTicketAdult),
+            children: Number(numberTicketChildren),
           },
-          ...user.bookedHotels,
-        ];
-        user.notifys = [
-          {
-            title: "Đặt nơi lưu trú thành công",
-            time: new Date(),
-            img: img,
-          },
-          ...user.notifys,
-        ];
-        await user.save();
+          bookedDate: new Date(),
+          img: img,
+          dateTo,
+          dateFrom,
+          numberRoom: Number(numberRoom),
+        };
+        const bookedHotel = new BookedHotels(bookedAtt);
+        await bookedHotel.save();
       }
     }
     res.status(StatusCodes.OK).json({
       message: "Tạo url thanh toán thành công",
       data: result.data,
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      mesage: error.mesage,
+    });
+  }
 };
 const callbackPay = async (req, res) => {
   let result = {};

@@ -2,23 +2,21 @@ const mongoose = require("mongoose");
 const bookedHotels = new mongoose.Schema({
   slugBooked: { type: String },
   idUser: { type: String, required: true },
-  idUnit: { type: String },
-  methodPayment: {
-    type: { type: Number },
-    name: { type: String },
+  unitCode: { type: String },
+  paymentMethod: {
+    type: String,
+    enum: ["zalopay", "credit-card", "cod", "banking-tranfer"],
   },
   paymentUrl: { type: String },
   totalBooked: { type: Number, required: true },
-  infoRoomBooked: [
-    {
-      name: { type: String },
-      numberAdult: { type: Number },
-      numberChildren: { type: Number },
-      price: { type: Number },
-    },
-  ],
-  dateStay: { type: Date },
-  bookedDate: { type: Date, default: Date.now() },
+  numberOfTicketsBooked: {
+    adult: { type: Number },
+    children: { type: Number },
+  },
+  dateTo: { type: Date },
+  dateFrom: { type: Date },
+  numberRoom: { type: Number },
+  bookedDate: { type: Date },
 });
 
 module.exports = mongoose.model("BookedHotels", bookedHotels);

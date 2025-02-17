@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 const bookedAttractions = new mongoose.Schema({
   slugBooked: { type: String },
   idUser: { type: String, required: true },
-  idUnit: { type: String },
+  unitCode: { type: String },
+  paymentMethod: {
+    type: String,
+    enum: ["zalopay", "credit-card", "cod", "banking-tranfer"],
+  },
   paymentUrl: { type: String },
   totalBooked: { type: Number, required: true },
   numberOfTicketsBooked: {
@@ -10,7 +14,8 @@ const bookedAttractions = new mongoose.Schema({
     children: { type: Number },
   },
   dateStart: { type: Date },
-  bookedDate: { type: Date, default: Date.now() },
+  hourStart: { type: String },
+  bookedDate: { type: Date },
 });
 
 module.exports = mongoose.model("BookedAttractions", bookedAttractions);
