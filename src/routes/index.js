@@ -7,6 +7,7 @@ const payRouter = require("./PayRouter");
 const commentRouter = require("./CommentRouter");
 const blogRouter = require("./BlogRoute");
 const imageRouter = require("./ImageRoute");
+const bookingRouter = require("./BookingRoute");
 
 function route(app) {
   app.use("/api/attraction", attractionRoute);
@@ -18,6 +19,7 @@ function route(app) {
   app.use("/api/comment", commentRouter);
   app.use("/api/blog", blogRouter);
   app.use("/api/image", imageRouter);
+  app.use("/api/booking", bookingRouter);
 }
 
 module.exports = route;

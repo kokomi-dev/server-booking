@@ -37,10 +37,12 @@ const getHotel = async (req, res) => {
         });
       }
     } else {
-      const listQuery = {};
+      const listQuery = {
+        isActive: true,
+      };
       const limit = parseInt(query.limit) || 10;
-      if (query.fillter === "outstanding") {
-        listQuery.isTrending = true;
+      if (query.fillter === "favorite") {
+        listQuery.isFavorite = true;
       }
       const hotel = await Hotel.find(listQuery).limit(limit);
       if (hotel.length > 0) {
