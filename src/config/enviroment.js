@@ -10,5 +10,7 @@ const env = {
   NODE_MODE: process.env.NODE_MODE,
 
   LOCAL_PORT: process.env.LOCAL_PORT,
+  SECRET_KEY_JWT: process.env.SECRET_KEY_JWT,
+  SECRET_KEY_JWT_REFRESHTOKEN: process.env.SECRET_KEY_JWT_REFRESHTOKEN,
 };
 module.exports = env;

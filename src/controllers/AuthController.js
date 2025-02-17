@@ -5,6 +5,7 @@ require("dotenv").config;
 const { StatusCodes } = require("http-status-codes");
 const { mongooseArrays } = require("~/utils/mongoose");
 const { v4: uuidv4 } = require("uuid");
+const env = require("~/config/enviroment");
 
 function checkGroupId(groupId) {
   if (groupId.includes("1") && groupId.includes("2") && groupId.includes("6")) {
@@ -153,12 +154,12 @@ const login = async (request, response) => {
             code: StatusCodes.FORBIDDEN,
           });
         }
-        const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY_JWT, {
+        const token = jwt.sign({ _id: user._id }, env.SECRET_KEY_JWT, {
           expiresIn: "5m",
         });
         const refreshToken = jwt.sign(
           { _id: user._id },
-          process.env.SECRET_KEY_JWT_REFRESHTOKEN,
+          env.SECRET_KEY_JWT_REFRESHTOKEN,
           {
             expiresIn: "15d",
           }
