@@ -8,6 +8,7 @@ const env = require("~/config/enviroment");
 const { CONNECT_DB } = require("~/config/mongosee");
 const hbs = require("express-handlebars").engine;
 const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const path = require("path");
 const START_SERVICE = () => {
