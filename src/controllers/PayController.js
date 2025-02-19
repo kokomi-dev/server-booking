@@ -16,7 +16,7 @@ const config = {
 const sendRequestPay = async (req, res) => {
   const {
     amount,
-    userId,
+    infoUser,
     tripId,
     category,
     img,
@@ -28,6 +28,9 @@ const sendRequestPay = async (req, res) => {
     numberRoom,
     dateTo,
     dateFrom,
+    infoAttraction,
+    infoHotel,
+    infoHotelRoom,
   } = req.body;
   const embed_data = {
     redirecturl: process.env.VNPAY_RETURN_URL,
@@ -69,8 +72,9 @@ const sendRequestPay = async (req, res) => {
       if (category === "attraction") {
         const bookedAtt = {
           slugBooked: tripId,
-          idUser: userId,
+          infoUser,
           unitCode: unitCode,
+          infoAttraction,
           paymentMethod: "zalopay",
           paymentUrl: order.app_trans_id,
           totalBooked: Number(amount),
@@ -89,7 +93,9 @@ const sendRequestPay = async (req, res) => {
       if (category === "hotel") {
         const bookedAtt = {
           slugBooked: tripId,
-          idUser: userId,
+          infoUser,
+          infoHotel,
+          infoHotelRoom,
           unitCode: unitCode,
           paymentMethod: "zalopay",
           paymentUrl: order.app_trans_id,

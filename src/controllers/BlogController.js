@@ -6,9 +6,9 @@ const Blog = require("../models/Blog");
 const getAllBlog = async (req, res) => {
   try {
     const { roles, unitCode, isDraft, isTrending } = req.query;
-    if (roles === "admin" && isDraft === "false") {
+    if (roles === "admin") {
       const data = await Blog.find({
-        isDraft: isDraft,
+        isDraft: isDraft ?? false,
       });
       return res.status(StatusCodes.OK).json({
         message: "Lấy thành công danh sách bài viết",
@@ -16,9 +16,9 @@ const getAllBlog = async (req, res) => {
         listBlogs: mongooseArrays(data),
       });
     }
-    if (roles === "partner" && isDraft === "false") {
+    if (roles === "partner") {
       const data = await Blog.find({
-        isDraft: false,
+        isDraft: isDraft ?? false,
         unitCode: unitCode,
       });
       return res.status(StatusCodes.OK).json({
@@ -53,7 +53,7 @@ const createBlog = async (req, res) => {
   try {
     const data = {
       ...req.body.data,
-      createdAt: new Date().toLocaleDateString("vi-VN"),
+      createdAt: new Date(),
       updatedAt: null,
       like: 0,
       comments: [],
@@ -105,7 +105,7 @@ const editBlog = async (req, res) => {
   try {
     const dataUpdate = {
       ...data,
-      updatedAt: new Date().toLocaleDateString("vi-VN"),
+      updatedAt: new Date(),
     };
     const blog = await Blog.findByIdAndUpdate(req.params.id, dataUpdate);
     if (blog) {
@@ -149,7 +149,7 @@ const updateLikeBlog = async (req, res) => {
       id,
       {
         $inc: { likes: 1 },
-        updatedAt: new Date().toLocaleDateString("vi-VN"),
+        updatedAt: new Date(),
       },
       { new: true }
     );
@@ -183,7 +183,7 @@ const postCommentBlog = async (req, res) => {
             email,
             roles,
             content,
-            commentDate: new Date().toLocaleDateString("vi-VN"),
+            commentDate: new Date(),
           },
         },
       },

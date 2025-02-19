@@ -1,7 +1,14 @@
 const mongoose = require("mongoose");
 const bookedAttractions = new mongoose.Schema({
   slugBooked: { type: String },
-  idUser: { type: String, required: true },
+  infoAttraction: {
+    name: { type: String },
+    address: { type: String },
+  },
+  infoUser: {
+    idUser: { type: String },
+    email: { type: String },
+  },
   unitCode: { type: String },
   paymentMethod: {
     type: String,
@@ -16,6 +23,7 @@ const bookedAttractions = new mongoose.Schema({
   dateStart: { type: Date },
   hourStart: { type: String },
   bookedDate: { type: Date },
+  isSuccess: { type: Boolean },
 });
 
 module.exports = mongoose.model("BookedAttractions", bookedAttractions);

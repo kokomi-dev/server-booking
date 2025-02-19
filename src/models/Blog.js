@@ -21,11 +21,10 @@ const blogSchema = new mongoose.Schema({
     type: String,
   },
   createdAt: {
-    type: String,
-    default: Date.now,
+    type: Date,
   },
   updatedAt: {
-    type: String || null,
+    type: Date,
   },
   isTrending: {
     type: Boolean,
@@ -55,7 +54,7 @@ const blogSchema = new mongoose.Schema({
       email: { type: String, required: true },
       roles: { type: String, required: true },
       content: { type: String, required: true },
-      commentDate: { type: String, required: true },
+      commentDate: { type: Date, required: true },
     },
   ],
 });
