@@ -1,8 +1,22 @@
 const mongoose = require("mongoose");
 const bookedHotels = new mongoose.Schema({
   slugBooked: { type: String },
-  idUser: { type: String, required: true },
+  infoUser: {
+    idUser: { type: String },
+    email: { type: String },
+  },
   unitCode: { type: String },
+  infoHotel: {
+    name: { type: String },
+    address: { type: String },
+  },
+  infoHotelRoom: [
+    {
+      id: { type: String },
+      name: { type: String },
+      numberBooked: { type: Number },
+    },
+  ],
   paymentMethod: {
     type: String,
     enum: ["zalopay", "credit-card", "cod", "banking-tranfer"],
@@ -17,6 +31,7 @@ const bookedHotels = new mongoose.Schema({
   dateFrom: { type: Date },
   numberRoom: { type: Number },
   bookedDate: { type: Date },
+  isSuccess: { type: Boolean },
 });
 
 module.exports = mongoose.model("BookedHotels", bookedHotels);
