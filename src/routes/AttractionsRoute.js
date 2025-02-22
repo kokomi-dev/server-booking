@@ -28,10 +28,7 @@ route.post(
   // attraction.createAttraction,
   attractionsController.createAttraction
 );
-// GET -api/tour/create - get view handlebars create tour
-route.get("/create", (req, res) => {
-  res.render("tours/createTour.hbs");
-});
+
 // Update status
 route.put("/status", attractionsController.updateStatusAttraction);
 

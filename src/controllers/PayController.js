@@ -5,7 +5,6 @@ const { StatusCodes } = require("http-status-codes");
 const moment = require("moment");
 const BookedAttractions = require("../models/BookedAttractions");
 const BookedHotels = require("../models/BookedHotels");
-
 const config = {
   app_id: "2554",
   key1: "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn",
@@ -14,41 +13,25 @@ const config = {
 };
 
 const sendRequestPay = async (req, res) => {
-  const {
-    amount,
-    infoUser,
-    tripId,
-    category,
-    img,
-    numberTicketAdult,
-    numberTicketChildren,
-    unitCode,
-    startDate,
-    hour,
-    numberRoom,
-    dateTo,
-    dateFrom,
-    infoAttraction,
-    infoHotel,
-    infoHotelRoom,
-  } = req.body;
+  const { amount, category } = req.body;
   const embed_data = {
-    redirecturl: process.env.VNPAY_RETURN_URL,
+    redirecturl: `${process.env.VNPAY_RETURN_URL}?category=${category}`,
+    ...req.body,
   };
   const items = [{}];
+
   const transID = Math.floor(Math.random() * 1000000);
   const order = {
     app_id: config.app_id,
     app_trans_id: `${moment().format("YYMMDD")}_${transID}`,
-    app_user: "user123",
+    app_user: "user123-kokotravel",
     app_time: Date.now(),
     item: JSON.stringify(items),
     embed_data: JSON.stringify(embed_data),
     amount: amount,
-    description: `KokoTravel - Payment for the order #${transID}`,
+    description: `KokoTravel - Thanh toán cho đơn hàng ID #${transID}`,
     bank_code: "",
-    img,
-    userId: userId,
+    callback_url: `${process.env.VNPAY_REDIREC_URL}?category=${category}`,
   };
 
   const data =
@@ -69,50 +52,6 @@ const sendRequestPay = async (req, res) => {
   try {
     const result = await axios.post(config.endpoint, null, { params: order });
     if (result && result.data) {
-      if (category === "attraction") {
-        const bookedAtt = {
-          slugBooked: tripId,
-          infoUser,
-          unitCode: unitCode,
-          infoAttraction,
-          paymentMethod: "zalopay",
-          paymentUrl: order.app_trans_id,
-          totalBooked: Number(amount),
-          numberOfTicketsBooked: {
-            adult: Number(numberTicketAdult),
-            children: Number(numberTicketChildren),
-          },
-          hourStart: hour,
-          dateStart: startDate,
-          bookedDate: new Date(),
-          img: img,
-        };
-        const bookedAttractions = new BookedAttractions(bookedAtt);
-        await bookedAttractions.save();
-      }
-      if (category === "hotel") {
-        const bookedAtt = {
-          slugBooked: tripId,
-          infoUser,
-          infoHotel,
-          infoHotelRoom,
-          unitCode: unitCode,
-          paymentMethod: "zalopay",
-          paymentUrl: order.app_trans_id,
-          totalBooked: Number(amount),
-          numberOfTicketsBooked: {
-            adult: Number(numberTicketAdult),
-            children: Number(numberTicketChildren),
-          },
-          bookedDate: new Date(),
-          img: img,
-          dateTo,
-          dateFrom,
-          numberRoom: Number(numberRoom),
-        };
-        const bookedHotel = new BookedHotels(bookedAtt);
-        await bookedHotel.save();
-      }
     }
     res.status(StatusCodes.OK).json({
       message: "Tạo url thanh toán thành công",
@@ -124,107 +63,137 @@ const sendRequestPay = async (req, res) => {
     });
   }
 };
+const checkOrderPay = async ({ orderId }) => {
+  let postData = {
+    app_id: config.app_id,
+    app_trans_id: orderId,
+  };
+
+  let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1;
+  postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
+
+  let postConfig = {
+    method: "post",
+    url: "https://sb-openapi.zalopay.vn/v2/query",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    data: qs.stringify(postData),
+  };
+
+  try {
+    const data = await axios(postConfig);
+    if (data) {
+      return data.data;
+    }
+  } catch (error) {
+    return {
+      message: "Kiểm tra dữ liệu thất bại",
+    };
+  }
+};
 const callbackPay = async (req, res) => {
-  let result = {};
   try {
     let dataStr = req.body.data;
     let reqMac = req.body.mac;
-
+    let category = req.query.category;
     let mac = CryptoJS.HmacSHA256(dataStr, config.key2).toString();
-    console.log("mac =", mac);
-    // kiểm tra callback hợp lệ (đến từ ZaloPay server)
     if (reqMac !== mac) {
-      // callback không hợp lệ
       result.returncode = -1;
       result.returnmessage = "mac not equal";
     } else {
-      let dataJson = JSON.parse(dataStr, config.key2);
-      console.log(
-        "update order's status = success where apptransid =",
-        dataJson["apptransid"]
-      );
+      let dataJson = JSON.parse(dataStr);
+      const { app_trans_id, embed_data } = dataJson;
 
-      result.returncode = 1;
-      result.returnmessage = "success";
-    }
-  } catch (ex) {
-    result.returncode = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
-    result.returnmessage = ex.message;
-  }
-
-  res.json(result);
-};
-const checkOrderPay = async (req, res) => {
-  const { orderId } = req.body;
-  let postData = {
-    app_id: config.app_id,
-    app_trans_id: orderId, // Input your app_trans_id
-  };
-
-  let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1; // appid|app_trans_id|key1
-  postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
-
-  let postConfig = {
-    method: "post",
-    url: "https://sb-openapi.zalopay.vn/v2/query",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    data: qs.stringify(postData),
-  };
-
-  try {
-    const data = await axios(postConfig);
-    if (data) {
-      res.status(StatusCodes.OK).json({
-        message: "Kiểm tra trạng thái  thành công",
-        result: data.data,
-      });
+      const parsedEmbedData = JSON.parse(embed_data);
+      const {
+        infoUser,
+        infoAttraction,
+        infoHotel,
+        infoHotelRoom,
+        unitCode,
+        tripId,
+        amount,
+        numberTicketAdult,
+        numberTicketChildren,
+        hour,
+        startDate,
+        img,
+        dateTo,
+        dateFrom,
+      } = parsedEmbedData;
+      const res = await checkOrderPay({ orderId: app_trans_id });
+      if (res && res.return_code === 1) {
+        if (category === "attraction") {
+          const bookedAtt = {
+            slugBooked: tripId,
+            infoUser,
+            unitCode: unitCode,
+            infoAttraction,
+            paymentMethod: "zalopay",
+            paymentUrl: app_trans_id,
+            totalBooked: Number(amount),
+            numberOfTicketsBooked: {
+              adult: Number(numberTicketAdult),
+              children: Number(numberTicketChildren),
+            },
+            hourStart: hour,
+            dateStart: startDate,
+            bookedDate: new Date(),
+            img: img,
+            isSuccess: true,
+          };
+          const bookedAttractions = new BookedAttractions(bookedAtt);
+          await bookedAttractions.save();
+          await axios.put(
+            process.env.LOCAL_HOST_PORT + "/api/attraction/status",
+            {
+              id: tripId,
+              caseStatus: "update-number-tickets",
+              numberTicketAdult,
+              numberTicketChildren,
+            }
+          );
+        } else {
+          const bookedH = {
+            slugBooked: tripId,
+            infoUser,
+            infoHotel,
+            infoHotelRoom,
+            unitCode: unitCode,
+            paymentMethod: "zalopay",
+            paymentUrl: app_trans_id,
+            totalBooked: Number(amount),
+            numberOfTicketsBooked: {
+              adult: Number(numberTicketAdult),
+              children: Number(numberTicketChildren),
+            },
+            bookedDate: new Date(),
+            img: img,
+            dateTo,
+            dateFrom,
+            isSuccess: true,
+          };
+          const bookedHotel = new BookedHotels(bookedH);
+          await bookedHotel.save();
+          await axios.put(process.env.LOCAL_HOST_PORT + "/api/hotel/status", {
+            id: tripId,
+            caseStatus: "update-number-room-booked",
+            infoHotelRoom,
+          });
+        }
+      }
     }
   } catch (error) {
-    res.status(StatusCodes.NO_CONTENT).json({
-      message: "Kiểm tra dữ liệu thất bại",
-      error: error,
+    return res.status(StatusCodes.OK).json({
+      message: "Thanh toán không thành công",
+      err: error.message,
     });
   }
 };
-const checkOrderPayHotel = async (req, res) => {
-  const { orderId } = req.body;
-  let postData = {
-    app_id: config.app_id,
-    app_trans_id: orderId, // Input your app_trans_id
-  };
 
-  let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1; // appid|app_trans_id|key1
-  postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
-
-  let postConfig = {
-    method: "post",
-    url: "https://sb-openapi.zalopay.vn/v2/query",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    data: qs.stringify(postData),
-  };
-
-  try {
-    const data = await axios(postConfig);
-    if (data) {
-      res.status(StatusCodes.OK).json({
-        message: "Kiểm tra trạng thái  thành công",
-        result: data.data,
-      });
-    }
-  } catch (error) {
-    res.status(StatusCodes.NO_CONTENT).json({
-      message: "Kiểm tra dữ liệu thất bại",
-      error: error,
-    });
-  }
-};
 module.exports = {
   sendRequestPay,
   callbackPay,
   checkOrderPay,
-  checkOrderPayHotel,
 };

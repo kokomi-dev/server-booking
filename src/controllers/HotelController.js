@@ -51,7 +51,7 @@ const getHotel = async (req, res) => {
           data: mongooseArrays(hotel),
         });
       } else {
-        res.status(StatusCodes.BAD_REQUEST).json({
+        res.status(StatusCodes.OK).json({
           messages: "Không có hotel nào được tìm thấy",
           data: [],
         });
@@ -122,7 +122,7 @@ const createHotel = async (req, res) => {
     const formData = {
       ...req.body,
       images: req.files.map((img) => img.path),
-      createdAt: new Date().toLocaleDateString("vi-VN"),
+      createdAt: new Date(),
       cancelFree: req.body.cacelFree === "false" ? false : true,
       type: Number(req.body.type),
       comments: [],
@@ -170,7 +170,7 @@ const createRoom = async (req, res) => {
       id,
       {
         $push: { listRooms: data },
-        $set: { updatedAt: new Date().toLocaleDateString("vi-VN") },
+        $set: { updatedAt: new Date() },
       },
       {
         new: true,
@@ -298,7 +298,7 @@ const updateHotel = async (req, res) => {
           name: req.body.location_commune_name,
         },
       },
-      updatedAt: new Date().toLocaleDateString("vi-VN"),
+      updatedAt: new Date(),
     };
     const hotelUpdate = Hotel.findByIdAndUpdate(slug, formData, {
       new: true,
@@ -318,19 +318,50 @@ const updateHotel = async (req, res) => {
   }
 };
 const updateStatusHotel = async (req, res) => {
+  const { id, data, caseStatus, infoHotelRoom } = req.body;
   try {
-    const hotel = await Hotel.findByIdAndUpdate(req.body.id, {
-      isActive: req.body.data.isActive,
-    });
-    return res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      messages: "cập nhật trạng thái địa điểm tham quan thành công",
-      hotel: hotel,
-    });
+    if (caseStatus) {
+      switch (caseStatus) {
+        case "update-number-room-booked":
+          const hotel = await Hotel.findById(id);
+          if (!hotel) {
+            throw new Error("Không tìm thấy khách sạn");
+          }
+          for (const room of infoHotelRoom) {
+            const roomId = room.id;
+            const hotelRoom = hotel.listRooms.find(
+              (r) => r._id.toString() === roomId
+            );
+            if (hotelRoom) {
+              return await Hotel.updateOne(
+                { _id: id, "listRooms._id": roomId },
+                {
+                  $set: {
+                    "listRooms.$.numberOfRoom":
+                      hotelRoom.numberOfRoom - room.numberBooked,
+                    "listRooms.$.numberOfRoomBooked":
+                      hotelRoom.numberOfRoomBooked ?? 0 + room.numberBooked,
+                  },
+                }
+              );
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    } else {
+      const hotel = await Hotel.findByIdAndUpdate(id, data);
+      return res.status(StatusCodes.OK).json({
+        code: StatusCodes.OK,
+        messages: "cập nhật nơi lưu trú thành công",
+        hotel: hotel,
+      });
+    }
   } catch (error) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       code: StatusCodes.BAD_REQUEST,
-      messages: "lỗi khi cập nhật trạng thái địa điểm tham quan",
+      messages: "lỗi khi cập nhật nơi lưu trú",
       error: error.message,
     });
   }
