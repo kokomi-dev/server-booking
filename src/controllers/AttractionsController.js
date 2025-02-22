@@ -145,7 +145,7 @@ const createAttraction = async (req, res) => {
     const formData = {
       ...req.body,
       images: req.files.map((img) => img.path),
-      createdAt: new Date().toLocaleDateString("vi-VN"),
+      createdAt: new Date(),
       updatedAt: null,
       startDate: formatDateToDDMMYYYY(req.body.startDate),
       comments: [],
@@ -189,7 +189,7 @@ const updateAttraction = async (req, res) => {
   try {
     const formData = {
       ...req.body,
-      updatedAt: new Date().toLocaleDateString("vi-VN"),
+      updatedAt: new Date(),
       images: [...req.body.images, ...req.files.map((img) => img.path)],
       location: {
         detail: req.body.location_detail,
@@ -225,16 +225,37 @@ const updateAttraction = async (req, res) => {
   }
 };
 const updateStatusAttraction = async (req, res) => {
+  const { id, data, caseStatus, numberTicketAdult, numberTicketChildren } =
+    req.body;
   try {
-    const attraction = await Attraction.findByIdAndUpdate(
-      req.body.id,
-      req.body.data
-    );
-    return res.status(StatusCodes.OK).json({
-      code: StatusCodes.OK,
-      messages: "cập nhật trạng thái địa điểm du lịch thành công",
-      attraction: attraction,
-    });
+    if (caseStatus) {
+      switch (caseStatus) {
+        case "update-number-tickets":
+          const attraction = await Attraction.findById(id);
+          const updatedAttraction = await Attraction.findByIdAndUpdate(
+            id,
+            {
+              $set: {
+                "numberOfTickets.adult":
+                  attraction.numberOfTickets.adult - numberTicketAdult,
+                "numberOfTickets.children":
+                  attraction.numberOfTickets.children - numberTicketChildren,
+              },
+            },
+            { new: true }
+          );
+          break;
+        default:
+          break;
+      }
+    } else {
+      const attraction = await Attraction.findByIdAndUpdate(id, data);
+      return res.status(StatusCodes.OK).json({
+        code: StatusCodes.OK,
+        messages: "cập nhật trạng thái địa điểm du lịch thành công",
+        attraction: attraction,
+      });
+    }
   } catch (error) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       code: StatusCodes.BAD_REQUEST,
@@ -243,6 +264,7 @@ const updateStatusAttraction = async (req, res) => {
     });
   }
 };
+
 const deleteAttraction = async (req, res) => {
   const id = req.params.id;
   try {

@@ -36,7 +36,12 @@ const getAllBlog = async (req, res) => {
       filter.unitCode = unitCode;
     }
 
-    const data = await Blog.find(filter);
+    const data = await Blog.find({
+      ...filter,
+      isDraft: false,
+      isActive: true,
+      isApprove: true,
+    });
     return res.status(StatusCodes.OK).json({
       message: "Lấy thành công danh sách bài viết",
       code: StatusCodes.OK,

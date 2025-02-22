@@ -29,7 +29,6 @@ const bookedHotels = new mongoose.Schema({
   },
   dateTo: { type: Date },
   dateFrom: { type: Date },
-  numberRoom: { type: Number },
   bookedDate: { type: Date },
   isSuccess: { type: Boolean },
 });

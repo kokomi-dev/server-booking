@@ -241,7 +241,7 @@ const updateUser = async (req, res) => {
                 ...reqData,
                 email: findUser.email,
                 password: hasPass,
-                updated: new Date().toLocaleDateString("vi-VN"),
+                updated: new Date(),
               },
             },
             { new: true }

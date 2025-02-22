@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const route = require("./routes/index");
 const errorHandling = require("~/middlewares/errorHandling");
@@ -38,8 +37,8 @@ const START_SERVICE = () => {
 
   app.use(methodOverride("_method"));
   // Middleware  URL-encoded and JSON
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(express.json());
+  app.use(express.json()); // Hỗ trợ JSON payload
+  app.use(express.urlencoded({ extended: true }));
   // route
   route(app);
   // middleware => handle event erros
