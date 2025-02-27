@@ -5,8 +5,17 @@ const { mongooseArrays } = require("~/utils/mongoose");
 
 const getBookedAttraction = async (req, res) => {
   const { roles, unitCode } = req.query;
-  if (roles === "admin") {
+  if (roles === "admin" && !!unitCode) {
     const data = await BookedAttractions.find();
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thành công địa điểm tham quan đã đặt",
+      code: StatusCodes.OK,
+      data: mongooseArrays(data),
+    });
+  } else {
+    const data = await BookedAttractions.find({
+      unitCode,
+    });
     return res.status(StatusCodes.OK).json({
       message: "Lấy thành công địa điểm tham quan đã đặt",
       code: StatusCodes.OK,
@@ -16,8 +25,15 @@ const getBookedAttraction = async (req, res) => {
 };
 const getBookedHotel = async (req, res) => {
   const { roles, unitCode } = req.query;
-  if (roles === "admin") {
+  if (roles === "admin" && !!unitCode) {
     const data = await BookedHotels.find();
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thành công lưu trú đã đặt",
+      code: StatusCodes.OK,
+      data: mongooseArrays(data),
+    });
+  } else {
+    const data = await BookedHotels.find({ unitCode });
     return res.status(StatusCodes.OK).json({
       message: "Lấy thành công lưu trú đã đặt",
       code: StatusCodes.OK,
@@ -113,6 +129,7 @@ const getInfoBooked = async (req, res) => {
         const reponse = await BookedAttractions.findOne({
           paymentUrl: id,
         });
+        console.log(reponse);
         return res.status(StatusCodes.OK).json({
           message: "Lấy dữ liệu thành công",
           code: StatusCodes.OK,

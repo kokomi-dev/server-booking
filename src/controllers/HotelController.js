@@ -366,19 +366,92 @@ const updateStatusHotel = async (req, res) => {
     });
   }
 };
-const searchResult = async (req, res) => {
+const getFilterHotel = async (req, res) => {
+  const query = req.query;
   try {
-    const address = req.query.address;
-    const hotel = await Hotel.find({
-      "city-slug": address,
-    });
-    res.status(StatusCodes.OK).json({
-      message: "Lấy danh sách hotel ở " + address + " thành công",
-      data: mongooseArrays(hotel),
+    let listQuery = {};
+    const limit = parseInt(query.limit) || 10;
+    let sortOption = {};
+
+    if (query.roles && query.idCode) {
+      let hotels = null;
+      if (query.roles === "admin") {
+        hotels = await Hotel.find();
+      } else if (query.roles === "partner") {
+        hotels = await Hotel.find({ unitCode: query.idCode });
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          messages: "Vai trò không hợp lệ",
+          code: StatusCodes.BAD_REQUEST,
+        });
+      }
+      return res.status(StatusCodes.OK).json({
+        messages:
+          hotels.length > 0
+            ? "Lấy danh sách nơi lưu trú thành công"
+            : "Không có nơi lưu trú nào được tìm thấy",
+        data: mongooseArrays(hotels),
+        code: StatusCodes.OK,
+      });
+    }
+    if (query.address !== undefined && query.address) {
+      listQuery.city = query.address;
+    }
+    if (query.cancelFree === "1") {
+      listQuery.cancelFree = true;
+    }
+    if (query.isFavorite == "1") {
+      listQuery.isFavorite = true;
+    }
+
+    if (query.price && query.price !== "") {
+      const priceRanges = {
+        1: { $gte: 0, $lte: 400000 },
+        2: { $gte: 400000, $lte: 1000000 },
+        3: { $gte: 1000000, $lte: 3000000 },
+        4: { $gte: 3000000, $lte: 5000000 },
+        5: { $gte: 5000000, $lte: 1000000000 },
+      };
+      if (priceRanges[query.price])
+        listQuery["listRooms.0.price"] = priceRanges[query.price];
+    }
+
+    if (query.rating) {
+      const ratingRanges = {
+        1: { $gte: 4.5, $lte: 5 },
+        2: { $gte: 4, $lte: 5 },
+        3: { $gte: 3.5, $lte: 5 },
+        4: { $gte: 3, $lte: 5 },
+      };
+      if (ratingRanges[query.rating])
+        listQuery.rating = ratingRanges[query.rating];
+    }
+    if (query.filterBar) {
+      if (query.filterBar == 1) {
+        sortOption["listRooms.0.price"] = 1;
+      }
+      if (query.filterBar == 2) {
+        sortOption["rating"] = 1;
+      }
+    } else {
+      sortOption = { _id: 1 };
+    }
+
+    const hotels = await Hotel.find(listQuery).sort(sortOption);
+
+    return res.status(StatusCodes.OK).json({
+      messages:
+        hotels.length > 0
+          ? "Lấy danh sách nơi lưu trú thành công"
+          : "Không có nơi lưu trú nào được tìm thấy",
+      data: mongooseArrays(hotels),
+      code: StatusCodes.OK,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      messages: "Lỗi khi gọi lên server",
+      error: error.message,
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
     });
   }
 };
@@ -391,13 +464,12 @@ const getHotelBooked = async (req, res) => {
     // Send response
     if (hotelBooked.length > 0) {
       res.status(StatusCodes.OK).json({
-        messages: "Lấy danh sách địa điểm tham quan đã đặt thành công",
+        messages: "Lấy danh sách nơi lưu trú đã đặt thành công",
         data: mongooseArrays(hotelBooked),
       });
     } else {
       res.status(StatusCodes.NOT_FOUND).json({
-        messages:
-          "Không có địa điểm tham quan nào đã được đặt nào được tìm thấy",
+        messages: "Không có nơi lưu trú nào đã được đặt nào được tìm thấy",
         data: [],
       });
     }
@@ -411,7 +483,7 @@ module.exports = {
   createHotel,
   createRoom,
   deleteHotel,
-  searchResult,
+  getFilterHotel,
   getHotelBooked,
   updateHotel,
   updateStatusHotel,
