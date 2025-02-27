@@ -11,3 +11,19 @@ function formatDateToDDMMYYYY(inputDate) {
 
   return `${day}/${month}/${year}`;
 }
+function dateConvertToISO(dateString) {
+  const [year, month, day] = dateString.split("/").map(Number);
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  ) {
+    return date.toISOString();
+  } else {
+    return "Invalid date";
+  }
+}
+
+export { formatDateToDDMMYYYY, dateConvertToISO };

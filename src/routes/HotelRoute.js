@@ -13,7 +13,7 @@ route.post(
 route.get("/", hotelController.getHotel);
 route.delete("/:slug", hotelController.deleteHotel);
 
-route.get("/searchresult", hotelController.searchResult);
+route.get("/filter", hotelController.getFilterHotel);
 route.put("/status", hotelController.updateStatusHotel);
 
 route.get("/:slug", hotelController.getDetail);

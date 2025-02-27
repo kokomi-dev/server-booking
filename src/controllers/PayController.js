@@ -123,7 +123,7 @@ const callbackPay = async (req, res) => {
         dateFrom,
       } = parsedEmbedData;
       const res = await checkOrderPay({ orderId: app_trans_id });
-      if (res && res.return_code === 1) {
+      if (res && res.return_code == 1) {
         if (category === "attraction") {
           const bookedAtt = {
             slugBooked: tripId,

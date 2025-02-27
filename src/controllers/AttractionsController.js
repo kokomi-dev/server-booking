@@ -1,3 +1,5 @@
+import { dateConvertToISO } from "~/utils/formatDate";
+
 const { StatusCodes } = require("http-status-codes");
 const Attraction = require("../models/Attraction");
 const { mongooseArrays, mongoose } = require("../utils/mongoose");
@@ -9,81 +11,11 @@ export const convertToSlug = (text) => {
   return text;
 };
 const getAttractions = async (req, res) => {
-  const query = req.query;
-
   try {
-    // get attractions admin with roles admin and partner
-    if (query.roles && query.idCode) {
-      let attractions = null;
-
-      switch (query.roles) {
-        case "admin": {
-          attractions = await Attraction.find();
-          break;
-        }
-        case "partner": {
-          attractions = await Attraction.find({ unitCode: query.idCode });
-          break;
-        }
-        default:
-          return res.status(StatusCodes.BAD_REQUEST).json({
-            messages: "Vai trò không hợp lệ",
-            code: StatusCodes.BAD_REQUEST,
-          });
-      }
-
-      if (attractions && attractions.length > 0) {
-        return res.status(StatusCodes.OK).json({
-          messages: "Lấy danh sách địa điểm tham quan du lịch thành công",
-          data: mongooseArrays(attractions),
-          code: StatusCodes.OK,
-        });
-      } else {
-        return res.status(StatusCodes.OK).json({
-          messages: "Không có địa điểm tham quan nào được tìm thấy",
-          data: [],
-          code: StatusCodes.OK,
-        });
-      }
-    }
-
-    const listQuery = {};
-    const limit = parseInt(query.limit) || 10;
-    if (query.trending === "true") {
-      listQuery.isTrending = true;
-    }
-    const attractions = await Attraction.find(listQuery).limit(limit);
-
-    if (attractions.length > 0) {
-      return res.status(StatusCodes.OK).json({
-        messages: "Lấy danh sách địa điểm tham quan du lịch thành công",
-        data: mongooseArrays(attractions),
-      });
-    } else {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        messages: "Không có địa điểm tham quan nào được tìm thấy",
-        data: [],
-      });
-    }
-  } catch (error) {
-    return res.status(StatusCodes.BAD_REQUEST).json({
-      messages: "Lỗi khi gọi lên server",
-      code: StatusCodes.BAD_REQUEST,
-    });
-  }
-};
-
-const searchResult = async (req, res) => {
-  try {
-    const address = req.query.address;
-    const attraction = await Attraction.find({
-      "city-slug": address,
-    });
+    const attraction = await Attraction.find();
     res.status(StatusCodes.OK).json({
-      message:
-        "Lấy danh sách địa điểm tham quan ở " +
-        req.query.address +
-        " thành công",
+      message: "Lấy danh sách địa điểm tham quan thành công",
+      code: StatusCodes.OK,
       data: mongooseArrays(attraction),
     });
   } catch (error) {
@@ -92,6 +24,105 @@ const searchResult = async (req, res) => {
     });
   }
 };
+const getFilterAttractions = async (req, res) => {
+  const query = req.query;
+  try {
+    let listQuery = {};
+    const limit = parseInt(query.limit) || 10;
+    let sortOption = {};
+
+    if (query.roles && query.idCode) {
+      let attractions = null;
+      if (query.roles === "admin") {
+        attractions = await Attraction.find();
+      } else if (query.roles === "partner") {
+        attractions = await Attraction.find({ unitCode: query.idCode });
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          messages: "Vai trò không hợp lệ",
+          code: StatusCodes.BAD_REQUEST,
+        });
+      }
+
+      return res.status(StatusCodes.OK).json({
+        messages:
+          attractions.length > 0
+            ? "Lấy danh sách địa điểm tham quan du lịch thành công"
+            : "Không có địa điểm tham quan nào được tìm thấy",
+        data: mongooseArrays(attractions),
+        code: StatusCodes.OK,
+      });
+    }
+    if (query.address !== undefined && query.address) {
+      listQuery.city = query.address;
+    }
+    if (query.trending === "true") {
+      listQuery.isTrending = true;
+    }
+    if (query.startDate) {
+      listQuery.startDate = dateConvertToISO(query.startDate);
+    }
+    if (
+      query.difficulty &&
+      query.difficulty !== undefined &&
+      !isNaN(query.difficulty)
+    ) {
+      listQuery.difficulty = Number(query.difficulty);
+    }
+    if (query.price && query.price !== "") {
+      const priceRanges = {
+        0: {},
+        1: { $gte: 0, $lte: 400000 },
+        2: { $gte: 400000, $lte: 1000000 },
+        3: { $gte: 1000000, $lte: 3000000 },
+        4: { $gte: 3000000, $lte: 5000000 },
+        5: { $gte: 5000000, $lte: 1000000000 },
+      };
+      if (priceRanges[query.price])
+        listQuery["price.0"] = priceRanges[query.price];
+    }
+
+    if (query.rating != 0) {
+      const ratingRanges = {
+        1: { $gte: 4.5, $lte: 5 },
+        2: { $gte: 4, $lte: 5 },
+        3: { $gte: 3.5, $lte: 5 },
+        4: { $gte: 3, $lte: 5 },
+      };
+      if (ratingRanges[query.rating])
+        listQuery.rating = ratingRanges[query.rating];
+    }
+
+    if (query.filterBar) {
+      if (query.filterBar == 1) {
+        sortOption["price.0"] = 1;
+      }
+      if (query.filterBar == 2) {
+        sortOption["rating"] = 1;
+      }
+    } else {
+      sortOption = { _id: 1 };
+    }
+
+    const attractions = await Attraction.find(listQuery).sort(sortOption);
+
+    return res.status(StatusCodes.OK).json({
+      messages:
+        attractions.length > 0
+          ? "Lấy danh sách địa điểm tham quan du lịch thành công"
+          : "Không có địa điểm tham quan nào được tìm thấy",
+      data: mongooseArrays(attractions),
+      code: StatusCodes.OK,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      messages: "Lỗi khi gọi lên server",
+      error: error.message,
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
 const getAttractionsDetail = async (req, res) => {
   try {
     const slug = req.params.slug;
@@ -147,6 +178,7 @@ const createAttraction = async (req, res) => {
       images: req.files.map((img) => img.path),
       createdAt: new Date(),
       updatedAt: null,
+      difficutly: Number(req.body.difficutly),
       startDate: formatDateToDDMMYYYY(req.body.startDate),
       comments: [],
       location: {
@@ -290,5 +322,5 @@ module.exports = {
   deleteAttraction,
   createAttraction,
   getAttractionsDetail,
-  searchResult,
+  getFilterAttractions,
 };
