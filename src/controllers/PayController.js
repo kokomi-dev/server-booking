@@ -145,15 +145,35 @@ const callbackPay = async (req, res) => {
           };
           const bookedAttractions = new BookedAttractions(bookedAtt);
           await bookedAttractions.save();
-          await axios.put(
-            process.env.LOCAL_HOST_PORT + "/api/attraction/status",
-            {
-              id: tripId,
-              caseStatus: "update-number-tickets",
-              numberTicketAdult,
-              numberTicketChildren,
-            }
-          );
+
+          try {
+            const [updateResponse, emailResponse] = await Promise.all([
+              axios.put(
+                `${process.env.LOCAL_HOST_PORT}/api/attraction/status`,
+                {
+                  id: tripId,
+                  caseStatus: "update-number-tickets",
+                  numberTicketAdult,
+                  numberTicketChildren,
+                }
+              ),
+              axios.post(
+                `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
+                {
+                  ...bookedAtt,
+                  category: "attraction",
+                }
+              ),
+            ]);
+
+            console.log("Update tickets response:", updateResponse.data);
+            console.log("Email response:", emailResponse.data);
+          } catch (error) {
+            console.error(
+              "Failed to process requests:",
+              error.response ? error.response.data : error.message
+            );
+          }
         } else {
           const bookedH = {
             slugBooked: tripId,
@@ -176,11 +196,30 @@ const callbackPay = async (req, res) => {
           };
           const bookedHotel = new BookedHotels(bookedH);
           await bookedHotel.save();
-          await axios.put(process.env.LOCAL_HOST_PORT + "/api/hotel/status", {
-            id: tripId,
-            caseStatus: "update-number-room-booked",
-            infoHotelRoom,
-          });
+          try {
+            const [updateResponse, emailResponse] = await Promise.all([
+              axios.put(`${process.env.LOCAL_HOST_PORT}/api/hotel/status`, {
+                id: tripId,
+                caseStatus: "update-number-room-booked",
+                infoHotelRoom,
+              }),
+              axios.post(
+                `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
+                {
+                  ...bookedH,
+                  category: "hotel",
+                }
+              ),
+            ]);
+
+            console.log("Update tickets response:", updateResponse.data);
+            console.log("Email response:", emailResponse.data);
+          } catch (error) {
+            console.error(
+              "Failed to process requests:",
+              error.response ? error.response.data : error.message
+            );
+          }
         }
       }
     }

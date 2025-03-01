@@ -6,15 +6,7 @@ const upload = require("../middlewares/multerUpload");
 // GET -api/tour - get data from table tours
 route.get("/", attractionsController.getAttractions);
 route.get("/keep-server-live", (req, res) => {
-  res.status(200).json({
-    code: 200,
-    message: "server đã được ping đến",
-    data: [
-      {
-        query: "access thành cống",
-      },
-    ],
-  });
+  res.status(200).send("server is awake");
 });
 // GET -api/tour/searchresult?address=""
 route.get("/filter", attractionsController.getFilterAttractions);

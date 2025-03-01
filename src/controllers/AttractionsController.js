@@ -11,16 +11,66 @@ export const convertToSlug = (text) => {
   return text;
 };
 const getAttractions = async (req, res) => {
+  const { roles, unitCode, isTrending } = req.query;
+  console.log(roles, unitCode);
   try {
-    const attraction = await Attraction.find();
-    res.status(StatusCodes.OK).json({
-      message: "Lấy danh sách địa điểm tham quan thành công",
-      code: StatusCodes.OK,
-      data: mongooseArrays(attraction),
-    });
+    const query = req.query;
+    if (roles && unitCode) {
+      let attractions = null;
+      switch (roles) {
+        case "admin": {
+          attractions = await Attraction.find();
+          break;
+        }
+        case "partner": {
+          attractions = await Attraction.find({ unitCode: unitCode });
+          break;
+        }
+        default:
+          return res.status(StatusCodes.BAD_REQUEST).json({
+            messages: "Vai trò không hợp lệ",
+            code: StatusCodes.BAD_REQUEST,
+          });
+      }
+
+      if (attractions.length > 0) {
+        res.status(StatusCodes.OK).json({
+          messages: "Lấy danh sách địa điểm địa điểm du lịch thành công",
+          data: mongooseArrays(attractions),
+          code: StatusCodes.OK,
+        });
+      } else {
+        res.status(StatusCodes.OK).json({
+          messages: "Không có địa điểm địa điểm du lịch nào được tìm thấy",
+          data: [],
+          code: StatusCodes.OK,
+        });
+      }
+    } else {
+      const listQuery = {
+        isActive: true,
+      };
+      const limit = parseInt(query.limit) || 10;
+      if (isTrending) {
+        listQuery.isTrending = true;
+      }
+      const attraction = await Attraction.find(listQuery).limit(limit);
+      if (attraction.length > 0) {
+        res.status(StatusCodes.OK).json({
+          messages: "Lấy danh sách địa điểm du lịch  thành công",
+          data: mongooseArrays(attraction),
+        });
+      } else {
+        res.status(StatusCodes.OK).json({
+          messages: "Không có địa điểm nào được tìm thấy",
+          data: [],
+        });
+      }
+    }
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Lỗi khi kết nối đến server",
+      code: StatusCodes.BAD_REQUEST,
     });
   }
 };
@@ -31,12 +81,12 @@ const getFilterAttractions = async (req, res) => {
     const limit = parseInt(query.limit) || 10;
     let sortOption = {};
 
-    if (query.roles && query.idCode) {
+    if (query.roles && query.unitCode) {
       let attractions = null;
       if (query.roles === "admin") {
         attractions = await Attraction.find();
       } else if (query.roles === "partner") {
-        attractions = await Attraction.find({ unitCode: query.idCode });
+        attractions = await Attraction.find({ unitCode: query.unitCode });
       } else {
         return res.status(StatusCodes.BAD_REQUEST).json({
           messages: "Vai trò không hợp lệ",
@@ -53,7 +103,7 @@ const getFilterAttractions = async (req, res) => {
         code: StatusCodes.OK,
       });
     }
-    if (query.address !== undefined && query.address) {
+    if (query.address !== "undefined" && query.address) {
       listQuery.city = query.address;
     }
     if (query.trending === "true") {

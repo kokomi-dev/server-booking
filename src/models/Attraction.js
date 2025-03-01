@@ -52,7 +52,7 @@ const attractionSchema = new mongoose.Schema({
   guides: { type: String, required: true },
   comments: [
     {
-      idUser: { type: mongoose.Schema.ObjectId, ref: "User" },
+      idUser: { type: String },
       name: { type: String },
       nameShow: { type: String },
       content: { type: String, required: true },
