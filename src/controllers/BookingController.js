@@ -129,7 +129,6 @@ const getInfoBooked = async (req, res) => {
         const reponse = await BookedAttractions.findOne({
           paymentUrl: id,
         });
-        console.log(reponse);
         return res.status(StatusCodes.OK).json({
           message: "Lấy dữ liệu thành công",
           code: StatusCodes.OK,

@@ -12,7 +12,7 @@ const User = new mongoose.Schema({
   idCode: { type: String },
   numberPhone: { type: String },
   password: { type: String, required: true },
-  createdAt: { type: Date, date: Date.now() },
+  createdAt: { type: Date },
   updatedAt: { type: Date },
   notifys: [
     {

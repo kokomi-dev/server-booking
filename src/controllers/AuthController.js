@@ -69,73 +69,72 @@ const getAllUser = async (req, res) => {
 };
 const register = async (request, response) => {
   try {
-    let bodyRequest = request.body;
-    const reqRoles = bodyRequest.roles;
-    if (!bodyRequest.email) {
-      return response.status(StatusCodes.UNAUTHORIZED).json({
-        status: "Error 400: Bad Request",
-        message: "email is required",
-        code: StatusCodes.UNAUTHORIZED,
-      });
-    }
-    if (!bodyRequest.numberPhone) {
-      return response.status(StatusCodes.UNAUTHORIZED).json({
-        status: "Error 400: Bad Request",
-        message: "numberphone is required",
-        code: StatusCodes.UNAUTHORIZED,
-      });
-    }
-    if (!bodyRequest.password) {
-      return response.status(StatusCodes.UNAUTHORIZED).json({
-        status: "Error 400: Bad Request",
-        message: "password is required",
-        code: StatusCodes.UNAUTHORIZED,
-      });
-    }
-    if (!bodyRequest.firstname) {
-      return response.status(StatusCodes.UNAUTHORIZED).json({
-        status: "Error 400: Bad Request",
-        message: "firstname is required",
-        code: StatusCodes.UNAUTHORIZED,
-      });
-    }
-    if (!bodyRequest.lastname) {
-      return response.status(StatusCodes.UNAUTHORIZED).json({
-        status: "Error 400: Bad Request",
-        message: "lastname is required",
-        code: StatusCodes.UNAUTHORIZED,
-      });
-    }
-    if (!validatePasword(bodyRequest.password)) {
+    const {
+      email,
+      numberPhone,
+      password,
+      firstname,
+      lastname,
+      roles,
+      groupId,
+    } = request.body;
+
+    if (!email || !numberPhone || !password || !firstname || !lastname) {
       return response.status(StatusCodes.BAD_REQUEST).json({
         status: "Error 400: Bad Request",
-        message: "Mật khẩu không đủ yêu cầu cho phép!",
-        code: StatusCodes.UNAUTHORIZED,
+        message:
+          "All fields (email, numberPhone, password, firstname, lastname) are required.",
+        code: StatusCodes.BAD_REQUEST,
       });
     }
-    const hasPass = await bcrypt.hash(bodyRequest.password, 10);
+
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return response.status(StatusCodes.OK).json({
+        message: "Email đã tồn tại",
+        code: StatusCodes.CONFLICT,
+      });
+    }
+
+    if (!validatePasword(password)) {
+      return response.status(StatusCodes.BAD_REQUEST).json({
+        message: "Mật khẩu không đủ yêu cầu cho phép!",
+        code: StatusCodes.BAD_REQUEST,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await userModel.create({
-      ...bodyRequest,
-      password: hasPass,
-      isActive: await checkGroupId(bodyRequest.groupId),
-      isUnitActive: reqRoles === "custommer" ? null : false,
+      email,
+      numberPhone,
+      password: hashedPassword,
+      firstname,
+      lastname,
+      roles,
+      isActive: roles === "custommer",
+      isUnitActive: roles !== "custommer",
       isNewbie: true,
-      roles: reqRoles,
-      idCode: reqRoles === "custommer" ? "" : uuidv4().slice(0, 6),
-      groupId: bodyRequest.groupId,
+      idCode: roles === "custommer" ? "" : uuidv4().slice(0, 6),
+      groupId,
+      createdAt: new Date(),
     });
+
     user.password = undefined;
-    return response.status(StatusCodes.OK).json({
+
+    return response.status(StatusCodes.CREATED).json({
       message: "Đăng kí thành công tài khoản",
-      user: user,
+      user,
     });
   } catch (error) {
-    return response.status(StatusCodes.BAD_REQUEST).json({
-      message: error.message,
-      code: StatusCodes.UNAUTHORIZED,
+    console.error("Registration error:", error);
+    return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
     });
   }
 };
+
 const login = async (request, response) => {
   try {
     const bodyRequest = request.body;
@@ -201,7 +200,6 @@ const login = async (request, response) => {
     });
   }
 };
-
 const getCurrentUser = async (req, res) => {
   const { userId } = req.body;
 
@@ -224,7 +222,6 @@ const getCurrentUser = async (req, res) => {
     });
   }
 };
-
 const updateUser = async (req, res) => {
   try {
     const reqData = req.body.data;
@@ -241,7 +238,7 @@ const updateUser = async (req, res) => {
                 ...reqData,
                 email: findUser.email,
                 password: hasPass,
-                updated: new Date(),
+                updatedAt: new Date(),
               },
             },
             { new: true }
@@ -294,7 +291,10 @@ const updateStatus = async (req, res) => {
   try {
     const reqData = req.body.data;
     const idUpdate = req.body.id;
-    const user = await userModel.findByIdAndUpdate(idUpdate, reqData);
+    const user = await userModel.findByIdAndUpdate(idUpdate, {
+      ...reqData,
+      updatedAt: new Date(),
+    });
     if (user) {
       return res.status(StatusCodes.OK).json({
         message: "Cập nhật thành công trạng thái",

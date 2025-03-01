@@ -394,7 +394,7 @@ const getFilterHotel = async (req, res) => {
         code: StatusCodes.OK,
       });
     }
-    if (query.address !== undefined && query.address) {
+    if (query.address !== "undefined" && query.address) {
       listQuery.city = query.address;
     }
     if (query.cancelFree === "1") {
@@ -436,8 +436,7 @@ const getFilterHotel = async (req, res) => {
     } else {
       sortOption = { _id: 1 };
     }
-
-    const hotels = await Hotel.find(listQuery).sort(sortOption);
+    const hotels = await Hotel.find({ ...listQuery }).sort(sortOption);
 
     return res.status(StatusCodes.OK).json({
       messages:
