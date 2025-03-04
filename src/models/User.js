@@ -23,7 +23,6 @@ const User = new mongoose.Schema({
   ],
   isActive: { type: Boolean, required: true },
   isUnitActive: { type: Boolean },
-  isNewbie: { type: Boolean, default: false },
   roles: {
     type: String,
     required: true,
@@ -35,6 +34,11 @@ const User = new mongoose.Schema({
     unitName: { type: String },
     unitAddress: { type: String },
     unitTaxCode: { type: String },
+  },
+  numberOfBooked: {
+    attraction: { type: Number },
+    hotel: { type: Number },
+    bookedDateLatest: { type: Date },
   },
 });
 

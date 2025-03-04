@@ -147,27 +147,35 @@ const callbackPay = async (req, res) => {
           await bookedAttractions.save();
 
           try {
-            const [updateResponse, emailResponse] = await Promise.all([
-              axios.put(
-                `${process.env.LOCAL_HOST_PORT}/api/attraction/status`,
-                {
-                  id: tripId,
-                  caseStatus: "update-number-tickets",
-                  numberTicketAdult,
-                  numberTicketChildren,
-                }
-              ),
-              axios.post(
-                `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
-                {
-                  ...bookedAtt,
+            const [updateResponse, emailResponse, updateUserBooked] =
+              await Promise.all([
+                axios.put(
+                  `${process.env.LOCAL_HOST_PORT}/api/attraction/status`,
+                  {
+                    id: tripId,
+                    caseStatus: "update-number-tickets",
+                    numberTicketAdult,
+                    numberTicketChildren,
+                  }
+                ),
+                axios.post(
+                  `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
+                  {
+                    ...bookedAtt,
+                    category: "attraction",
+                  }
+                ),
+                axios.post(`${process.env.LOCAL_HOST_PORT}/api/user/update`, {
+                  id: infoUser.idUser,
+                  count:
+                    Number(numberTicketAdult) + Number(numberTicketChildren),
                   category: "attraction",
-                }
-              ),
-            ]);
+                }),
+              ]);
 
             console.log("Update tickets response:", updateResponse.data);
             console.log("Email response:", emailResponse.data);
+            console.log("Email response:", updateUserBooked.data);
           } catch (error) {
             console.error(
               "Failed to process requests:",
@@ -197,23 +205,26 @@ const callbackPay = async (req, res) => {
           const bookedHotel = new BookedHotels(bookedH);
           await bookedHotel.save();
           try {
-            const [updateResponse, emailResponse] = await Promise.all([
-              axios.put(`${process.env.LOCAL_HOST_PORT}/api/hotel/status`, {
-                id: tripId,
-                caseStatus: "update-number-room-booked",
-                infoHotelRoom,
-              }),
-              axios.post(
-                `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
-                {
-                  ...bookedH,
+            const [updateResponseModel, emailResponse, updateUserBookedNumber] =
+              await Promise.all([
+                axios.put(`${process.env.LOCAL_HOST_PORT}/api/hotel/status`, {
+                  id: tripId,
+                  caseStatus: "update-number-room-booked",
+                  infoHotelRoom,
+                }),
+                axios.post(
+                  `${process.env.LOCAL_HOST_PORT}/api/email/send-email-tickets`,
+                  {
+                    ...bookedH,
+                    category: "hotel",
+                  }
+                ),
+                axios.post(`${process.env.LOCAL_HOST_PORT}/api/user/update`, {
+                  id: infoUser.idUser,
+                  count: infoHotelRoom.length,
                   category: "hotel",
-                }
-              ),
-            ]);
-
-            console.log("Update tickets response:", updateResponse.data);
-            console.log("Email response:", emailResponse.data);
+                }),
+              ]);
           } catch (error) {
             console.error(
               "Failed to process requests:",

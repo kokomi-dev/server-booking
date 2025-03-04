@@ -454,28 +454,7 @@ const getFilterHotel = async (req, res) => {
     });
   }
 };
-const getHotelBooked = async (req, res) => {
-  try {
-    const arr = req.body.arr;
-    const hotelBooked = await Hotel.find({
-      _id: { $in: arr },
-    });
-    // Send response
-    if (hotelBooked.length > 0) {
-      res.status(StatusCodes.OK).json({
-        messages: "Lấy danh sách nơi lưu trú đã đặt thành công",
-        data: mongooseArrays(hotelBooked),
-      });
-    } else {
-      res.status(StatusCodes.NOT_FOUND).json({
-        messages: "Không có nơi lưu trú nào đã được đặt nào được tìm thấy",
-        data: [],
-      });
-    }
-  } catch (error) {
-    throw new Error("Lỗi khi gửi dữ liệu lên server");
-  }
-};
+
 module.exports = {
   getHotel,
   getDetail,
@@ -483,7 +462,6 @@ module.exports = {
   createRoom,
   deleteHotel,
   getFilterHotel,
-  getHotelBooked,
   updateHotel,
   updateStatusHotel,
   updateRoom,

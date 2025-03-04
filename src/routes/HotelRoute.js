@@ -17,7 +17,6 @@ route.get("/filter", hotelController.getFilterHotel);
 route.put("/status", hotelController.updateStatusHotel);
 
 route.get("/:slug", hotelController.getDetail);
-route.post("/getHotelBooked", hotelController.getHotelBooked);
 route.put("/edit/:slug", upload.array("images"), hotelController.updateHotel);
 route.post("/room/:slug", hotelController.createRoom);
 route.put("/room/:slug", hotelController.updateRoom);
