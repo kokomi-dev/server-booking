@@ -4,7 +4,7 @@ const BookedHotels = require("../models/BookedHotels");
 const { mongooseArrays } = require("~/utils/mongoose");
 
 const getBookedAttraction = async (req, res) => {
-  const { roles, unitCode } = req.query;
+  const { roles, unitCode, id } = req.query;
   if (roles === "admin" && !!unitCode) {
     const data = await BookedAttractions.find();
     return res.status(StatusCodes.OK).json({
@@ -12,7 +12,8 @@ const getBookedAttraction = async (req, res) => {
       code: StatusCodes.OK,
       data: mongooseArrays(data),
     });
-  } else {
+  }
+  if (unitCode && roles === "partner") {
     const data = await BookedAttractions.find({
       unitCode,
     });
@@ -22,9 +23,30 @@ const getBookedAttraction = async (req, res) => {
       data: mongooseArrays(data),
     });
   }
+  if (id) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const data = await BookedAttractions.find({
+      "infoUser.idUser": id,
+    }).sort({
+      dateStart: 1,
+    });
+    const sortedData = data.sort((a, b) => {
+      const dateA = new Date(a.dateStart);
+      const dateB = new Date(b.dateStart);
+      if (dateA < today && dateB >= today) return 1;
+      if (dateA >= today && dateB < today) return -1;
+      return 0;
+    });
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thành công địa điểm tham quan đã đặt",
+      code: StatusCodes.OK,
+      data: mongooseArrays(sortedData),
+    });
+  }
 };
 const getBookedHotel = async (req, res) => {
-  const { roles, unitCode } = req.query;
+  const { roles, unitCode, id } = req.query;
   if (roles === "admin" && !!unitCode) {
     const data = await BookedHotels.find();
     return res.status(StatusCodes.OK).json({
@@ -32,12 +54,34 @@ const getBookedHotel = async (req, res) => {
       code: StatusCodes.OK,
       data: mongooseArrays(data),
     });
-  } else {
+  }
+  if (unitCode && roles === "partner") {
     const data = await BookedHotels.find({ unitCode });
     return res.status(StatusCodes.OK).json({
       message: "Lấy thành công lưu trú đã đặt",
       code: StatusCodes.OK,
       data: mongooseArrays(data),
+    });
+  }
+  if (id) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const data = await BookedHotels.find({
+      "infoUser.idUser": id,
+    }).sort({
+      dateFrom: 1,
+    });
+    const sortedData = data.sort((a, b) => {
+      const dateA = new Date(a.dateFrom);
+      const dateB = new Date(b.dateFrom);
+      if (dateA < today && dateB >= today) return 1;
+      if (dateA >= today && dateB < today) return -1;
+      return 0;
+    });
+    return res.status(StatusCodes.OK).json({
+      message: "Lấy thành công địa điểm lưu trú đã đặt",
+      code: StatusCodes.OK,
+      data: mongooseArrays(sortedData),
     });
   }
 };
