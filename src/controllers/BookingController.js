@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const BookedAttractions = require("../models/BookedAttractions");
 const BookedHotels = require("../models/BookedHotels");
 const { mongooseArrays } = require("~/utils/mongoose");
+const { default: axios } = require("axios");
 
 const getBookedAttraction = async (req, res) => {
   const { roles, unitCode, id } = req.query;
@@ -142,7 +143,14 @@ const createBooked = async (req, res) => {
   };
   if (category === "attraction") {
     const bookedAttractions = new BookedAttractions(bookedAtt);
+
     await bookedAttractions.save();
+    await axios.post(`${process.env.LOCAL_HOST_PORT}/api/user/update`, {
+      id: infoUser.idUser,
+      count: Number(numberTicketAdult) + Number(numberTicketChildren),
+      category: "attraction",
+    });
+
     return res.status(StatusCodes.OK).json({
       message: "Đặt thành công địa điểm du lịch",
       code: StatusCodes.OK,
@@ -152,6 +160,11 @@ const createBooked = async (req, res) => {
   if (category === "hotel") {
     const newBookedHotel = new BookedHotels(bookedHotel);
     await newBookedHotel.save();
+    await axios.post(`${process.env.LOCAL_HOST_PORT}/api/user/update`, {
+      id: infoUser.idUser,
+      count: infoHotelRoom.length,
+      category: "hotel",
+    });
     return res.status(StatusCodes.OK).json({
       message: "Đặt thành công noi lưu trú",
       code: StatusCodes.OK,

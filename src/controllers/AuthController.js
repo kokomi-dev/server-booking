@@ -114,9 +114,12 @@ const register = async (request, response) => {
       roles,
       isActive: roles === "custommer",
       isUnitActive: roles !== "custommer",
-      isNewbie: true,
       idCode: roles === "custommer" ? "" : uuidv4().slice(0, 6),
       groupId,
+      numberOfBooked: {
+        attraction: 0,
+        hotel: 0,
+      },
       createdAt: new Date(),
     });
 
