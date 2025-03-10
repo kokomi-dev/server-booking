@@ -10,6 +10,7 @@ const commentRouter = require("./CommentRouter");
 const blogRouter = require("./BlogRoute");
 const imageRouter = require("./ImageRoute");
 const bookingRouter = require("./BookingRoute");
+const chatRouter = require("./ChatRoute");
 
 function route(app) {
   app.use("/api/attraction", attractionRoute);
@@ -23,6 +24,7 @@ function route(app) {
   app.use("/api/blog", blogRouter);
   app.use("/api/image", imageRouter);
   app.use("/api/booking", bookingRouter);
+  app.use("/api/chat", chatRouter);
 }
 
 module.exports = route;

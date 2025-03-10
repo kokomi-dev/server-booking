@@ -121,6 +121,9 @@ const callbackPay = async (req, res) => {
         img,
         dateTo,
         dateFrom,
+        note,
+        expectedTime,
+        pickUpPoint,
       } = parsedEmbedData;
       const res = await checkOrderPay({ orderId: app_trans_id });
       if (res && res.return_code == 1) {
@@ -142,6 +145,8 @@ const callbackPay = async (req, res) => {
             bookedDate: new Date(),
             img: img,
             isSuccess: true,
+            pickUpPoint,
+            note,
           };
           const bookedAttractions = new BookedAttractions(bookedAtt);
           await bookedAttractions.save();
@@ -201,6 +206,8 @@ const callbackPay = async (req, res) => {
             dateTo,
             dateFrom,
             isSuccess: true,
+            note,
+            expectedTime,
           };
           const bookedHotel = new BookedHotels(bookedH);
           await bookedHotel.save();

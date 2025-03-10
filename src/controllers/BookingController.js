@@ -104,6 +104,9 @@ const createBooked = async (req, res) => {
     infoHotel,
     infoHotelRoom,
     isSuccess,
+    pickUpPoint,
+    expectedTime,
+    note,
   } = req.body;
   const bookedAtt = {
     slugBooked: tripId,
@@ -122,6 +125,8 @@ const createBooked = async (req, res) => {
     img,
     bookedDate: new Date(),
     isSuccess,
+    note,
+    pickUpPoint,
   };
   const bookedHotel = {
     slugBooked: tripId,
@@ -140,6 +145,8 @@ const createBooked = async (req, res) => {
     img,
     bookedDate: new Date(),
     isSuccess,
+    expectedTime,
+    note,
   };
   if (category === "attraction") {
     const bookedAttractions = new BookedAttractions(bookedAtt);

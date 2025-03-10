@@ -4,6 +4,7 @@ const bookedHotels = new mongoose.Schema({
   infoUser: {
     idUser: { type: String },
     email: { type: String },
+    name: { type: String },
   },
   unitCode: { type: String },
   infoHotel: {
@@ -30,7 +31,9 @@ const bookedHotels = new mongoose.Schema({
   dateTo: { type: Date },
   dateFrom: { type: Date },
   bookedDate: { type: Date },
+  expectedTime: { type: String },
   isSuccess: { type: Boolean },
+  note: { type: String },
 });
 
 module.exports = mongoose.model("BookedHotels", bookedHotels);
