@@ -7,6 +7,7 @@ const bookedAttractions = new mongoose.Schema({
   },
   infoUser: {
     idUser: { type: String },
+    name: { type: String },
     email: { type: String },
   },
   unitCode: { type: String },
@@ -23,7 +24,9 @@ const bookedAttractions = new mongoose.Schema({
   dateStart: { type: Date },
   hourStart: { type: String },
   bookedDate: { type: Date },
+  pickUpPoint: { type: String },
   isSuccess: { type: Boolean },
+  note: { type: String },
 });
 
 module.exports = mongoose.model("BookedAttractions", bookedAttractions);

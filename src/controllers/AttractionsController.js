@@ -12,7 +12,6 @@ export const convertToSlug = (text) => {
 };
 const getAttractions = async (req, res) => {
   const { roles, unitCode, isTrending } = req.query;
-  console.log(roles, unitCode);
   try {
     const query = req.query;
     if (roles && unitCode) {
@@ -49,12 +48,14 @@ const getAttractions = async (req, res) => {
     } else {
       const listQuery = {
         isActive: true,
+        startDate: { $gte: new Date() },
       };
       const limit = parseInt(query.limit) || 10;
       if (isTrending) {
         listQuery.isTrending = true;
       }
       const attraction = await Attraction.find(listQuery).limit(limit);
+
       if (attraction.length > 0) {
         res.status(StatusCodes.OK).json({
           messages: "Lấy danh sách địa điểm du lịch  thành công",
