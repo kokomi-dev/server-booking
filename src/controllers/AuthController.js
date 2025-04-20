@@ -23,7 +23,6 @@ function checkGroupId(groupId) {
   }
   return null;
 }
-
 const validatePasword = (password) => {
   return password.match(
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
@@ -152,6 +151,14 @@ const login = async (request, response) => {
         if (user.isUnitActive === false && user.roles === "partner") {
           return response.status(StatusCodes.OK).json({
             message: "Tài khoản chưa được cấp phép",
+            userEmail: user.email,
+            code: StatusCodes.FORBIDDEN,
+          });
+        }
+        if (user.isActive === false && user.roles === "custommer") {
+          return response.status(StatusCodes.OK).json({
+            message:
+              "Tài khoản của bạn đang bị tạm khóa. Liên hệ với quản trị viên !",
             userEmail: user.email,
             code: StatusCodes.FORBIDDEN,
           });
@@ -315,7 +322,6 @@ const updateStatus = async (req, res) => {
 };
 const logout = async (req, res) => {
   try {
-    // res.clearCookie("token_jwt");
     res.status(StatusCodes.OK).json({
       code: 200,
       message: "Đăng xuất người dùng thành công",
@@ -333,9 +339,8 @@ const refreshToken = async (req, res) => {
   if (!refreshToken) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: "Refresh Token is required!" });
+      .json({ message: "Refresh token chưa được gửi lên!" });
   }
-  // Xác minh refreshToken
   jwt.verify(
     refreshToken,
     process.env.SECRET_KEY_JWT_REFRESHTOKEN,

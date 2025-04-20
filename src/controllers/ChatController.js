@@ -1,6 +1,5 @@
 const { HfInference } = require("@huggingface/inference");
 
-// Khởi tạo client với token của bạn
 const client = new HfInference("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");
 
 const sendMessage = async (req, res) => {
@@ -26,7 +25,9 @@ const sendMessage = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
+// chat realtime
+const sendMessageIo = async () => {};
 module.exports = {
   sendMessage,
+  sendMessageIo,
 };

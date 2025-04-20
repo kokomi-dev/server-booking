@@ -42,6 +42,9 @@ const blogSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
   },
+  isToday: {
+    type: Boolean,
+  },
   likes: {
     type: Number,
     default: 0,

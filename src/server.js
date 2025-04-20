@@ -9,10 +9,17 @@ const hbs = require("express-handlebars").engine;
 const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
 const axios = require("axios").default;
+
+// const { createServer } = require("node:http");
+
+// const { Server } = require("socket.io");
+
 require("dotenv").config();
 
 const START_SERVICE = () => {
   const app = express();
+  // const server = createServer(app);
+  // const io = new Server(server);
   app.use(cors());
 
   // view engine handlebars
@@ -44,7 +51,7 @@ const START_SERVICE = () => {
   route(app);
   // middleware => handle event erros
   app.use(errorHandling);
-  // listen server on the port local
+  // handle ping server
   cron.schedule("*/14 * * * *", async () => {
     try {
       const response = await axios.get(
@@ -55,8 +62,11 @@ const START_SERVICE = () => {
       console.error("Error pinging server:", error.message);
     }
   });
+  // handle io chat
+  // io.on("connection", (socket) => {
+  //   console.log("a user connected");
+  // });
 
-  // handle ping server
   app.listen(env.LOCAL_PORT, () => {
     console.log(`3.Server is running  ${env.LOCAL_PORT}`);
   });
