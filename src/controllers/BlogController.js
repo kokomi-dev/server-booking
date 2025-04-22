@@ -6,6 +6,7 @@ const Blog = require("../models/Blog");
 const getAllBlog = async (req, res) => {
   try {
     const { roles, unitCode, isDraft, isTrending } = req.query;
+    // GET ADMIN
     if (roles === "admin") {
       const data = await Blog.find({
         isDraft: isDraft ?? false,
@@ -16,6 +17,7 @@ const getAllBlog = async (req, res) => {
         listBlogs: mongooseArrays(data),
       });
     }
+    // GET PARTNER
     if (roles === "partner") {
       const data = await Blog.find({
         isDraft: isDraft ?? false,
