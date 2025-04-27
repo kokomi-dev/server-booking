@@ -105,7 +105,43 @@ const delelteComment = async (req, res) => {
     });
   }
 };
+const editComment = async (req, res) => {
+  try {
+    const { id, category, slug, content } = req.body;
+    let findItem = {};
+    if (category === "attraction") {
+      findItem = await Attraction.findOne({
+        slug: slug,
+      }).exec();
+    }
+    if (category === "hotel") {
+      findItem = await Hotel.findOne({
+        slug: slug,
+      }).exec();
+    }
+    if (!findItem) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Not found item delete",
+      });
+    }
+    findItem.comments.forEach((cmt) => {
+      if (cmt._id == id) {
+        return (cmt.content = content);
+      }
+    });
+    await findItem.save();
+    res.status(StatusCodes.OK).json({
+      message: "Cập nhật thành công",
+      code: StatusCodes.OK,
+    });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   sendComment,
   delelteComment,
+  editComment,
 };

@@ -203,4 +203,49 @@ const sendEmailTicket = async (req, res) => {
   }
 };
 
-module.exports = { sendEmail, sendEmailTicket };
+const sendEmailChangePassword = async (req, res) => {
+  console.log(req.body);
+  const { email } = req.body;
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+    const info = await transporter.sendMail({
+      from: '"KoKoTravel" <no-reply@kokotravel.com>',
+      to: email,
+      subject: "Xác thực đổi mật khẩu - KoKoTravel",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h1 style="color: #4CAF50; text-align: center;">KoKoTravel</h1>
+          <p>Xin chào <strong>${email}</strong>,</p>
+          <p>Cảm ơn bạn sử dụng cài đặt tài khoản của chúng tôi. Để hoàn tất quá trình đổi mật khẩu của bạn, vui lòng sử dụng mã xác thực dưới đây:</p>
+          <div style="background-color: #f4f4f4; padding: 10px; text-align: center; border: 1px dashed #4CAF50; border-radius: 5px; margin: 20px 0;">
+            <h2 style="margin: 0; font-size: 28px; color: #333;">${code}</h2>
+          </div>
+          <p style="font-size: 14px; color: #666;">Mã xác thực này sẽ hết hạn sau <strong>1 phút</strong>. Vui lòng không chia sẻ mã này cho bất kỳ ai.</p>
+          <p>Nếu bạn không yêu cầu xác thực này, vui lòng bỏ qua email này hoặc liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+          <hr style="margin: 20px 0;">
+          <p style="text-align: center; font-size: 12px; color: #888;">Trân trọng,<br><strong>Đội ngũ hỗ trợ khách hàng KoKoTravel</strong></p>
+        </div>
+      `,
+    });
+    return res.status(StatusCodes.OK).json({
+      idEmail: info.messageId,
+      message: "Gửi email thành công",
+      code: code,
+      toEmail: email,
+    });
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Xảy ra lỗi khi thực hiện gửi email",
+      error: error.message,
+    });
+  }
+};
+module.exports = { sendEmail, sendEmailTicket, sendEmailChangePassword };

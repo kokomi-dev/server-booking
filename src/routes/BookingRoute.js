@@ -8,6 +8,10 @@ route.post("/attraction/:id", bookingController.updateBookedAttraction);
 
 route.get("/hotel", bookingController.getBookedHotel);
 route.post("/hotel/:id", bookingController.updateBookedHotel);
+route.post("/attraction/:id", bookingController.updateBookedAttraction);
+
 route.get("/get-info/:id", bookingController.getInfoBooked);
+route.post("/get-total-attractions", bookingController.totalBookedAttractions);
+route.post("/get-total-hotels", bookingController.totalBookedHotel);
 
 module.exports = route;

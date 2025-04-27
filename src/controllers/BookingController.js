@@ -221,10 +221,13 @@ const updateBookedHotel = async (req, res) => {
   try {
     const { data } = req.body;
     const { id } = req.params;
-    console.log(data, id);
-    const bookedHotel = BookedHotels.findByIdAndUpdate({ _id: id }, data, {
-      new: true,
-    });
+    const bookedHotel = await BookedHotels.findByIdAndUpdate(
+      { _id: id },
+      data,
+      {
+        new: true,
+      }
+    );
     if (bookedHotel) {
       return res.status(StatusCodes.OK).json({
         message: "Cập nhật thành công",
@@ -241,7 +244,451 @@ const updateBookedHotel = async (req, res) => {
   }
 };
 const updateBookedAttraction = async (req, res) => {
-  console.log(req);
+  try {
+    const { data } = req.body;
+    const { id } = req.params;
+    const bookedAttraction = await BookedAttractions.findByIdAndUpdate(
+      { _id: id },
+      data,
+      {
+        new: true,
+      }
+    );
+    console.log(bookedAttraction);
+    if (bookedAttraction) {
+      return res.status(StatusCodes.OK).json({
+        message: "Cập nhật thành công",
+        code: StatusCodes.OK,
+        bookedAttractionUpdate: bookedAttraction,
+      });
+    }
+  } catch (error) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Cập nhật không thành công",
+      code: StatusCodes.BAD_REQUEST,
+      err: error.message,
+    });
+  }
+};
+const totalBookedAttractions = async (req, res) => {
+  try {
+    const { all, date, week, month } = req.body;
+    let query = {};
+    let result = {};
+    const currentDate = new Date();
+
+    // Get beginning of current day (midnight)
+    const startOfDay = new Date(currentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Get beginning of current week (Sunday)
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Get end of current week (Saturday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Handle different filtering scenarios
+    if (all === true) {
+      // Get all data grouped by months
+      const currentYear = currentDate.getFullYear();
+      const allMonthsData = await BookedAttractions.aggregate([
+        {
+          $match: {
+            bookedDate: {
+              $gte: new Date(currentYear, 0, 1), // From January 1st of current year
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all months (including empty ones)
+      const monthsArray = [];
+      for (let i = 1; i <= 12; i++) {
+        const monthData = allMonthsData.find((item) => item._id === i);
+        monthsArray.push({
+          month: i,
+          totalRevenue: monthData ? monthData.totalRevenue : 0,
+          count: monthData ? monthData.count : 0,
+        });
+
+        // Only include months up to current month
+        if (i === currentDate.getMonth() + 1) break;
+      }
+
+      result = {
+        success: true,
+        data: monthsArray,
+      };
+    } else if (date === true) {
+      // Get data for today only
+      query = {
+        bookedDate: {
+          $gte: startOfDay,
+          $lt: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000),
+        },
+      };
+
+      const todayData = await BookedAttractions.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      result = {
+        success: true,
+        data: {
+          date: startOfDay,
+          totalRevenue: todayData.length > 0 ? todayData[0].totalRevenue : 0,
+          count: todayData.length > 0 ? todayData[0].count : 0,
+        },
+      };
+    } else if (week === true) {
+      // Get data for current week
+      query = {
+        bookedDate: { $gte: startOfWeek, $lte: endOfWeek },
+      };
+
+      const weekData = await BookedAttractions.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: { $dayOfWeek: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all days of week (including empty ones)
+      const weekArray = [];
+      for (let i = 1; i <= 7; i++) {
+        const dayData = weekData.find((item) => item._id === i);
+        const dayDate = new Date(startOfWeek);
+        dayDate.setDate(startOfWeek.getDate() + i - 1);
+
+        weekArray.push({
+          day: i,
+          date: dayDate,
+          totalRevenue: dayData ? dayData.totalRevenue : 0,
+          count: dayData ? dayData.count : 0,
+        });
+      }
+
+      result = {
+        success: true,
+        data: weekArray,
+        startOfWeek,
+        endOfWeek,
+      };
+    } else if (month.status === true) {
+      // Get data for specific month
+      const targetMonth = month.value
+        ? parseInt(month.value) - 1
+        : currentDate.getMonth();
+      const targetYear = currentDate.getFullYear();
+
+      const startOfMonth = new Date(targetYear, targetMonth, 1);
+      const endOfMonth = new Date(
+        targetYear,
+        targetMonth + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      );
+
+      query = {
+        bookedDate: { $gte: startOfMonth, $lte: endOfMonth },
+      };
+
+      const monthData = await BookedAttractions.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: { $dayOfMonth: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all days of month (including empty ones)
+      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const monthArray = [];
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayData = monthData.find((item) => item._id === i);
+        const dayDate = new Date(targetYear, targetMonth, i);
+
+        monthArray.push({
+          day: i,
+          date: dayDate,
+          totalRevenue: dayData ? dayData.totalRevenue : 0,
+          count: dayData ? dayData.count : 0,
+        });
+      }
+
+      result = {
+        success: true,
+        data: monthArray,
+        month: targetMonth + 1,
+        year: targetYear,
+      };
+    } else {
+      // If no valid filter is provided
+      result = {
+        success: false,
+        message:
+          "Please provide a valid filter parameter (all, date, week, or month)",
+      };
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in totalBookedAttractions:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+const totalBookedHotel = async (req, res) => {
+  try {
+    const { all, date, week, month, monthValue } = req.body;
+    let query = {};
+    let result = {};
+
+    const currentDate = new Date();
+
+    // Get beginning of current day (midnight)
+    const startOfDay = new Date(currentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Get beginning of current week (Sunday)
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Get end of current week (Saturday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // Handle different filtering scenarios
+    if (all === true) {
+      // Get all data grouped by months
+      const currentYear = currentDate.getFullYear();
+      const allMonthsData = await BookedHotels.aggregate([
+        {
+          $match: {
+            bookedDate: {
+              $gte: new Date(currentYear, 0, 1), // From January 1st of current year
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all months (including empty ones)
+      const monthsArray = [];
+      for (let i = 1; i <= 12; i++) {
+        const monthData = allMonthsData.find((item) => item._id === i);
+        monthsArray.push({
+          month: i,
+          totalRevenue: monthData ? monthData.totalRevenue : 0,
+          count: monthData ? monthData.count : 0,
+        });
+
+        // Only include months up to current month
+        if (i === currentDate.getMonth() + 1) break;
+      }
+
+      result = {
+        success: true,
+        data: monthsArray,
+      };
+    } else if (date === true) {
+      // Get data for today only
+      query = {
+        bookedDate: {
+          $gte: startOfDay,
+          $lt: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000),
+        },
+      };
+
+      const todayData = await BookedHotels.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      result = {
+        success: true,
+        data: {
+          date: startOfDay,
+          totalRevenue: todayData.length > 0 ? todayData[0].totalRevenue : 0,
+          count: todayData.length > 0 ? todayData[0].count : 0,
+        },
+      };
+    } else if (week === true) {
+      // Get data for current week
+      query = {
+        bookedDate: { $gte: startOfWeek, $lte: endOfWeek },
+      };
+
+      const weekData = await BookedHotels.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: { $dayOfWeek: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all days of week (including empty ones)
+      const weekArray = [];
+      for (let i = 1; i <= 7; i++) {
+        const dayData = weekData.find((item) => item._id === i);
+        const dayDate = new Date(startOfWeek);
+        dayDate.setDate(startOfWeek.getDate() + i - 1);
+
+        weekArray.push({
+          day: i,
+          date: dayDate,
+          totalRevenue: dayData ? dayData.totalRevenue : 0,
+          count: dayData ? dayData.count : 0,
+        });
+      }
+
+      result = {
+        success: true,
+        data: weekArray,
+        startOfWeek,
+        endOfWeek,
+      };
+    } else if (month.status === true) {
+      // Get data for specific month
+      const targetMonth = month.value
+        ? parseInt(month.value) - 1
+        : currentDate.getMonth();
+      const targetYear = currentDate.getFullYear();
+
+      const startOfMonth = new Date(targetYear, targetMonth, 1);
+      const endOfMonth = new Date(
+        targetYear,
+        targetMonth + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      );
+
+      query = {
+        bookedDate: { $gte: startOfMonth, $lte: endOfMonth },
+      };
+
+      const monthData = await BookedHotels.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: { $dayOfMonth: "$bookedDate" },
+            totalRevenue: { $sum: "$totalBooked" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+
+      // Transform to array with all days of month (including empty ones)
+      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const monthArray = [];
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayData = monthData.find((item) => item._id === i);
+        const dayDate = new Date(targetYear, targetMonth, i);
+
+        monthArray.push({
+          day: i,
+          date: dayDate,
+          totalRevenue: dayData ? dayData.totalRevenue : 0,
+          count: dayData ? dayData.count : 0,
+        });
+      }
+
+      result = {
+        success: true,
+        data: monthArray,
+        month: targetMonth + 1,
+        year: targetYear,
+      };
+    } else {
+      // If no valid filter is provided
+      result = {
+        success: false,
+        message:
+          "Please provide a valid filter parameter (all, date, week, or month)",
+      };
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in totalBookedHotels:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 module.exports = {
   getBookedAttraction,
@@ -250,4 +697,6 @@ module.exports = {
   updateBookedAttraction,
   updateBookedHotel,
   getInfoBooked,
+  totalBookedAttractions,
+  totalBookedHotel,
 };

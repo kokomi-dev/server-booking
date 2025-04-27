@@ -10,16 +10,16 @@ const cookieParser = require("cookie-parser");
 const cron = require("node-cron");
 const axios = require("axios").default;
 
-// const { createServer } = require("node:http");
-
-// const { Server } = require("socket.io");
+// Socket.IO setup
+const { createServer } = require("node:http"); // Uncomment this
+const setupSocketIO = require("./socket-server");
 
 require("dotenv").config();
 
 const START_SERVICE = () => {
   const app = express();
-  // const server = createServer(app);
-  // const io = new Server(server);
+  const server = createServer(app); // Uncomment this
+
   app.use(cors());
 
   // view engine handlebars
@@ -62,15 +62,15 @@ const START_SERVICE = () => {
       console.error("Error pinging server:", error.message);
     }
   });
-  // handle io chat
-  // io.on("connection", (socket) => {
-  //   console.log("a user connected");
-  // });
 
-  app.listen(env.LOCAL_PORT, () => {
-    console.log(`3.Server is running  ${env.LOCAL_PORT}`);
+  setupSocketIO(server);
+
+  // Change this to use 'server' instead of 'app'
+  server.listen(env.LOCAL_PORT, () => {
+    console.log(`3.Server is running on port ${env.LOCAL_PORT}`);
   });
 };
+
 (async () => {
   try {
     console.log("1.Mongosee connecting mongodb atlas");

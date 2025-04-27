@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const User = require("../models/User");
+const { sendEmailChangePassword } = require("./EmailController");
 const delUser = async (req, res) => {
   const { id } = req.params;
   try {
@@ -76,7 +77,46 @@ const updateUser = async (req, res) => {
     });
   }
 };
+const checkPasswordUpdateUser = async (req, res) => {
+  const { id, pass } = req.body;
+  if (!id || !pass) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: "Thiếu thông tin",
+      code: StatusCodes.BAD_REQUEST,
+    });
+  }
+  try {
+    const user = await User.findById(id);
+    if (user && user.password) {
+      const validPassword = await bcrypt.compare(pass, user.password);
+      if (validPassword) {
+        return res.status(StatusCodes.OK).json({
+          message: "Mật khẩu đúng",
+          code: StatusCodes.OK,
+        });
+      } else {
+        return res.status(StatusCodes.OK).json({
+          message: "Mật khẩu không đúng",
+          code: StatusCodes.BAD_REQUEST,
+        });
+      }
+    } else {
+      return res.status(StatusCodes.OK).json({
+        message: "Không tìm thấy tài khoản",
+        code: StatusCodes.BAD_REQUEST,
+      });
+    }
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Lỗi server",
+      err: error.message,
+      code: StatusCodes.INTERNAL_SERVER_ERROR,
+    });
+  }
+};
+
 module.exports = {
   delUser,
   updateUser,
+  checkPasswordUpdateUser,
 };

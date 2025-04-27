@@ -43,6 +43,7 @@ const attractionSchema = new mongoose.Schema({
   },
   createdAt: { type: Date },
   startDate: { type: Date, required: true },
+  discount: { type: Number, default: 0 },
   updatedAt: { type: Date },
   maxGroupSize: { type: Number, required: true },
   difficulty: { type: Number, required: true, enum: [1, 2, 3] },
